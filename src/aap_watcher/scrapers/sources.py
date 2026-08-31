@@ -9,16 +9,24 @@ from __future__ import annotations
 from .anr import ANRScraper
 from .sources_catalog import (
     ARSScraper,
+    AppelsProjetsRechercheScraper,
+    BPIScraper,
+    BZHScraper,
     BettencourtScraper,
     CNRSScraper,
     FRMScraper,
     FondationARCScraper,
     FondationDeFranceScraper,
+    GirciGoScraper,
+    HorizonEuropeScraper,
     INCaScraper,
     InraeScraper,
     InriaScraper,
     InsermScraper,
     LigueContreLeCancerScraper,
+    ResearchConnectScraper,
+    TeteCouScraper,
+    ThesaurusScraper,
 )
 
 SOURCES = {
@@ -34,6 +42,14 @@ SOURCES = {
     "inria": InriaScraper,
     "inrae": InraeScraper,
     "bettencourt": BettencourtScraper,
+    "thesaurus": ThesaurusScraper,
+    "bpi": BPIScraper,
+    "appel_projet_recherche": AppelsProjetsRechercheScraper,
+    "tete_cou": TeteCouScraper,
+    "research_connect": ResearchConnectScraper,
+    "bzh": BZHScraper,
+    "girci_go": GirciGoScraper,
+    "europe": HorizonEuropeScraper,
 }
 
 

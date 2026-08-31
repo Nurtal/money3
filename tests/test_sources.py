@@ -2,16 +2,24 @@ from aap_watcher.scrapers.sources import available_sources, get_source
 from aap_watcher.scrapers.sources_catalog import (
     ANRScraper,
     ARSScraper,
+    AppelsProjetsRechercheScraper,
+    BPIScraper,
+    BZHScraper,
     BettencourtScraper,
     CNRSScraper,
     FRMScraper,
     FondationARCScraper,
     FondationDeFranceScraper,
+    GirciGoScraper,
+    HorizonEuropeScraper,
     INCaScraper,
     InraeScraper,
     InriaScraper,
     InsermScraper,
     LigueContreLeCancerScraper,
+    ResearchConnectScraper,
+    TeteCouScraper,
+    ThesaurusScraper,
 )
 
 # Each fixture reproduces the *real* markup of the corresponding listing page
@@ -226,6 +234,139 @@ FIXTURES = {
         """,
         expect=["sciences du vivant", "Impulscience"],
     ),
+    "bpi": dict(
+        scraper=BPIScraper,
+        link_in_block=False,
+        html="""
+        <html><body>
+        <ul class="listing-block">
+          <li>
+            <div class="article-card">
+              <h3><a href="/nos-appels-a-projets-concours/appel-a-projets-ast">
+                Appel à projets : PIIEC sur les semiconducteurs</a></h3>
+            </div>
+          </li>
+          <li>
+            <div class="article-card">
+              <h3><a href="/nos-appels-a-projets-concours/appel-a-projets-bio">
+                Appel à Projets Innovations en biothérapies</a></h3>
+            </div>
+          </li>
+        </ul>
+        </body></html>
+        """,
+        expect=["semiconducteurs", "biothérapies"],
+    ),
+    "appel_projet_recherche": dict(
+        scraper=AppelsProjetsRechercheScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <div class="position-relative card border-0 bg-reversed h-100">
+          <h5>Pré-annonce : Appel à projets Transnational Conjoint 2026</h5>
+          <a href="/appel/1-anr-1988" class="btn">Lire la suite</a>
+        </div>
+        <div class="position-relative card border-0 bg-reversed h-100">
+          <h5>Appel à candidatures ANR 2027</h5>
+          <a href="/appel/1-anr-1994" class="btn">Lire la suite</a>
+        </div>
+        </body></html>
+        """,
+        expect=["Transnational Conjoint", "ANR 2027"],
+    ),
+    "tete_cou": dict(
+        scraper=TeteCouScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <h2>en cours</h2>
+        <h3><a href="https://www.tete-cou.fr/recherche/appels-a-projets/fondation">
+          Fondation Maladies Rares</a></h3>
+        <h3><a href="https://www.tete-cou.fr/recherche/appels-a-projets/erc">
+          European Research Council (ERC)</a></h3>
+        </body></html>
+        """,
+        expect=["Maladies Rares", "ERC"],
+    ),
+    "research_connect": dict(
+        scraper=ResearchConnectScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <article>
+          <h2><a href="https://myresearchconnect.com/news/epilepsy-2026/">
+            Epilepsy Research Institute UK Awards Open for 2026</a></h2>
+        </article>
+        <article>
+          <h2><a href="https://myresearchconnect.com/news/st-andrews-env-prize/">
+            Launch of 2026-2027 St Andrews Environment Prize</a></h2>
+        </article>
+        </body></html>
+        """,
+        expect=["Epilepsy", "St Andrews"],
+    ),
+    "bzh": dict(
+        scraper=BZHScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <h2><a href="https://www.bretagne.bzh/aides/langue-bretonne-aroad/">
+          Langue bretonne – Arload – Création de ressources numériques</a></h2>
+        <h2><a href="https://www.bretagne.bzh/aides/langue-bretonne-stlenn/">
+          Langue bretonne – Stlenn – Traduction de ressources numériques</a></h2>
+        </body></html>
+        """,
+        expect=["Arload", "Stlenn"],
+    ),
+    "girci_go": dict(
+        scraper=GirciGoScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <article>
+          <h2><a href="https://www.chu-hugo.fr/appels-a-projets/2027">
+            Appels à projets 2027 du GIRCI Grand Ouest</a></h2>
+        </article>
+        <article>
+          <h2><a href="https://www.chu-hugo.fr/appels-a-projets/laureats/">
+            Lauréats des appels à projets du GIRCI Grand Ouest</a></h2>
+        </article>
+        </body></html>
+        """,
+        expect=["GIRCI Grand Ouest", "Lauréats"],
+    ),
+    "europe": dict(
+        scraper=HorizonEuropeScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <article>
+          <h2><a href="https://www.horizon-europe.gouv.fr/meetup-greentech-2026">
+            Meet'Up Greentech 2026</a></h2>
+        </article>
+        <article>
+          <h2><a href="https://www.horizon-europe.gouv.fr/webinaire-eic-transition">
+            Webinaire checklist EIC Transition 2026</a></h2>
+        </article>
+        </body></html>
+        """,
+        expect=["Greentech", "EIC Transition"],
+    ),
+    "thesaurus": dict(
+        scraper=ThesaurusScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <table>
+          <tr><td><b>DGRINES : PHRC-N 2026/2027</b></td>
+              <td><a href="/thesaurus/financement/5766">Détail</a></td></tr>
+          <tr><td><b>PHRIP 2027</b></td>
+              <td><a href="/thesaurus/financement/5657">Détail</a></td></tr>
+        </table>
+        </body></html>
+        """,
+        expect=["PHRC-N", "PHRIP"],
+    ),
 }
 
 SOURCES_UNDER_TEST = {
@@ -241,6 +382,14 @@ SOURCES_UNDER_TEST = {
     "inria": InriaScraper,
     "inrae": InraeScraper,
     "bettencourt": BettencourtScraper,
+    "thesaurus": ThesaurusScraper,
+    "bpi": BPIScraper,
+    "appel_projet_recherche": AppelsProjetsRechercheScraper,
+    "tete_cou": TeteCouScraper,
+    "research_connect": ResearchConnectScraper,
+    "bzh": BZHScraper,
+    "girci_go": GirciGoScraper,
+    "europe": HorizonEuropeScraper,
 }
 
 

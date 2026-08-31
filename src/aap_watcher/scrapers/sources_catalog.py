@@ -22,6 +22,12 @@ _H2_BLOCK = r"<h2[^>]*>(?P<body>.*?)</h2>"
 #: Entry is a single ``<h3>`` (ARS/FRM/CNRS style heading entries).
 _H3_BLOCK = r"<h3[^>]*>(?P<body>.*?)</h3>"
 
+#: Entry is a ``<div class="...card...">`` (Appels Projets Recherche style).
+_APPEL_PROJET_CARD = r'<div class="[^"]*card[^"]*"[^>]*>(?P<body>.*?)</div>'
+
+#: Entry is a table ``<tr>`` row (GIRCI Est thesaurus style).
+_TR_BLOCK = r"<tr[^>]*>(?P<body>.*?)</tr>"
+
 
 class ANRScraper(GenericSourceScraper):
     source_name = "anr"
@@ -93,3 +99,48 @@ class BettencourtScraper(GenericSourceScraper):
     source_name = "bettencourt"
     listing_url = "https://www.fondationbs.org/candidater-un-prix"
     entry_block = _H2_BLOCK
+
+
+class BPIScraper(GenericSourceScraper):
+    source_name = "bpi"
+    listing_url = "https://www.bpifrance.fr/nos-appels-a-projets-concours"
+    entry_block = _H3_BLOCK
+
+
+class AppelsProjetsRechercheScraper(GenericSourceScraper):
+    source_name = "appel_projet_recherche"
+    listing_url = "https://www.appelsprojetsrecherche.fr/appels/1/6/W10="
+    entry_block = _APPEL_PROJET_CARD
+
+
+class TeteCouScraper(GenericSourceScraper):
+    source_name = "tete_cou"
+    listing_url = "https://www.tete-cou.fr/recherche/appels-a-projets-recherche"
+    entry_block = _H3_BLOCK
+
+
+class ResearchConnectScraper(GenericSourceScraper):
+    source_name = "research_connect"
+    listing_url = "https://www.myresearchconnect.com/news/"
+
+
+class BZHScraper(GenericSourceScraper):
+    source_name = "bzh"
+    listing_url = "https://www.bretagne.bzh/aides/"
+    entry_block = _H2_BLOCK
+
+
+class GirciGoScraper(GenericSourceScraper):
+    source_name = "girci_go"
+    listing_url = "https://www.girci-go.org"
+
+
+class HorizonEuropeScraper(GenericSourceScraper):
+    source_name = "europe"
+    listing_url = "https://www.horizon-europe.gouv.fr/"
+
+
+class ThesaurusScraper(GenericSourceScraper):
+    source_name = "thesaurus"
+    listing_url = "https://www.girci-est.fr/thesaurus/"
+    entry_block = _TR_BLOCK
