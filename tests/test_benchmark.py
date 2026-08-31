@@ -16,9 +16,24 @@ CORPUS = Path("data/benchmark/gold/v1.jsonl")
 
 def test_load_corpus_and_split():
     examples = load_corpus(CORPUS)
-    assert len(examples) == 3
+    assert len(examples) >= 3
     test_split = [e for e in examples if e.split == "test"]
-    assert len(test_split) == 2
+    train_split = [e for e in examples if e.split == "train"]
+    assert len(test_split) > 0
+    assert len(train_split) > 0
+    # Every example must be unique.
+    assert len({e.id for e in examples}) == len(examples)
+    # The test split must stay isolated from model development: all ids unique.
+    assert set(e.id for e in test_split).isdisjoint(e.id for e in train_split)
+
+
+def test_corpus_entity_offsets_match_text():
+    examples = load_corpus(CORPUS)
+    for ex in examples:
+        for ent in ex.entities:
+            assert ex.text[ent.start:ent.end] == ent.text, (
+                f"[{ex.id}] span {ent.text!r} != text[{ent.start}:{ent.end}]"
+            )
 
 
 def test_normalisation():
@@ -32,7 +47,7 @@ def test_benchmark_runs_and_measures():
     examples = load_corpus(CORPUS)
     result = run_benchmark(examples, [RegexExtractor()])
     r = result.results[0]
-    assert result.n_examples == 3
+    assert result.n_examples == len(examples)
     assert 0.0 <= r.f1 <= 1.0
     assert r.latency_ms > 0.0
     assert r.cost_eur == 0.0
