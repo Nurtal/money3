@@ -1,10 +1,15 @@
 from aap_watcher.scrapers.sources import available_sources, get_source
 from aap_watcher.scrapers.sources_catalog import (
     ARSScraper,
+    BettencourtScraper,
+    CNRSScraper,
     FRMScraper,
     FondationARCScraper,
     FondationDeFranceScraper,
     INCaScraper,
+    InraeScraper,
+    InriaScraper,
+    InsermScraper,
     LigueContreLeCancerScraper,
 )
 
@@ -30,6 +35,11 @@ SOURCES_UNDER_TEST = {
     "frm": (FRMScraper, "FRM"),
     "ligue_cancer": (LigueContreLeCancerScraper, "Ligue"),
     "fondation_france": (FondationDeFranceScraper, "Fondation de France"),
+    "inserm": (InsermScraper, "Inserm"),
+    "cnrs": (CNRSScraper, "CNRS"),
+    "inria": (InriaScraper, "INRIA"),
+    "inrae": (InraeScraper, "INRAE"),
+    "bettencourt": (BettencourtScraper, "Bettencourt"),
 }
 
 

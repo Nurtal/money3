@@ -9,10 +9,15 @@ from __future__ import annotations
 from .anr import ANRScraper
 from .sources_catalog import (
     ARSScraper,
+    BettencourtScraper,
+    CNRSScraper,
     FRMScraper,
     FondationARCScraper,
     FondationDeFranceScraper,
     INCaScraper,
+    InraeScraper,
+    InriaScraper,
+    InsermScraper,
     LigueContreLeCancerScraper,
 )
 
@@ -24,6 +29,11 @@ SOURCES = {
     "frm": FRMScraper,
     "ligue_cancer": LigueContreLeCancerScraper,
     "fondation_france": FondationDeFranceScraper,
+    "inserm": InsermScraper,
+    "cnrs": CNRSScraper,
+    "inria": InriaScraper,
+    "inrae": InraeScraper,
+    "bettencourt": BettencourtScraper,
 }
 
 
