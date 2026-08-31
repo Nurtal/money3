@@ -35,30 +35,108 @@ _MONTH_RE = "|".join(_MONTHS.keys())
 # Organisation detection (abbreviation → canonical gold value)
 # ---------------------------------------------------------------------------
 
-_ORG_ABBREVS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\bANR\b"), "ANR"),
-    (re.compile(r"\bINCa\b"), "INCa"),
-    (re.compile(r"\bInserm\b", re.IGNORECASE), "Inserm"),
-    (re.compile(r"\bCNRS\b"), "CNRS"),
-    (re.compile(r"\bFRM\b"), "FRM"),
-    (re.compile(r"\bLigue\s+contre\s+le\s+[Cc]ancer\b"), "Ligue contre le Cancer"),
-    (re.compile(r"\bFondation\s+ARC\b"), "Fondation ARC"),
-    (re.compile(r"\bFondation\s+de\s+France\b"), "Fondation de France"),
-    (re.compile(r"\bARS\s+(Île-de-France|Ile-de-France)\b"), "ARS Île-de-France"),
-    (re.compile(r"\bARS\s+Auvergne[- ]Rh[ôo]ne[- ]Alpes\b"), "ARS Auvergne-Rhône-Alpes"),
-    (re.compile(r"\bARS\s+Occitanie\b"), "ARS Occitanie"),
-    (re.compile(r"\bARS\s+Provence[- ]Alpes[- ]C[ôo]te\s+d.Azur\b"), "ARS Provence-Alpes-Côte d'Azur"),
-    (re.compile(r"\bARS\s+Bretagne\b"), "ARS Bretagne"),
-    (re.compile(r"\bARS\s+Hauts[- ]de[- ]France\b"), "ARS Hauts-de-France"),
-    (re.compile(r"\bARS\s+Normandie\b"), "ARS Normandie"),
-    (re.compile(r"\bARS\s+Nouvelle[- ]Aquitaine\b"), "ARS Nouvelle-Aquitaine"),
-    (re.compile(r"\bARS\s+Guadeloupe\b"), "ARS Guadeloupe"),
-    (re.compile(r"\bARS\b"), "ARS"),  # generic ARS fallback
-    (re.compile(r"\bCHU\s+Grenoble\s+Alpes\b"), "CHU Grenoble Alpes"),
-    (re.compile(r"\bCHU\s+de\s+Lyon\b"), "CHU de Lyon"),
-    (re.compile(r"\bAP-HP\b"), "AP-HP"),
-    (re.compile(r"\bCommission\s+europ[ée]enne\b"), "Commission européenne"),
+#: (canonical gold value, [compiled search patterns]) — abbreviations AND the
+#: full French names that appear as the issuing organisation.
+_ORG_NAMES: list[tuple[str, list[re.Pattern]]] = [
+    ("ANR", [re.compile(r"\bANR\b"), re.compile(r"Agence nationale\s+de\s+la\s+[Rr]echerche")]),
+    ("INCa", [re.compile(r"\bINCa\b"), re.compile(r"Institut national\s+(?:du|de)\s+[Cc]ancer(?:ologie)?")]),
+    ("Inserm", [re.compile(r"\bInserm\b"), re.compile(r"Institut national\s+de\s+la\s+sant[ée]")]),
+    ("CNRS", [re.compile(r"\bCNRS\b"), re.compile(r"[Cc]entre national\s+de\s+la\s+[Rr]echerche")]),
+    ("FRM", [re.compile(r"\bFRM\b"), re.compile(r"Fondation pour\s+la\s+[Rr]echerche\s+[Mm][ée]dicale")]),
+    ("Ligue contre le Cancer", [re.compile(r"Ligue\s+contre\s+le\s+[Cc]ancer")]),
+    ("Fondation ARC", [re.compile(r"Fondation\s+ARC")]),
+    ("Fondation de France", [re.compile(r"Fondation\s+de\s+France")]),
+    ("ARS Île-de-France", [re.compile(r"ARS\s+(?:[ÎI]le-de-France)"), re.compile(r"\bARS\s+IDF\b")]),
+    ("ARS Auvergne-Rhône-Alpes", [re.compile(r"ARS\s+Auvergne[- ]Rh[ôo]ne[- ]Alpes"), re.compile(r"\bARS\s+AURA\b")]),
+    ("ARS Occitanie", [re.compile(r"ARS\s+Occitanie")]),
+    ("ARS Provence-Alpes-Côte d'Azur", [re.compile(r"ARS\s+Provence[- ]Alpes[- ]C[ôo]te")]),
+    ("ARS PACA", [re.compile(r"ARS\s+PACA")]),
+    ("ARS Bretagne", [re.compile(r"ARS\s+Bretagne")]),
+    ("ARS Hauts-de-France", [re.compile(r"ARS\s+Hauts[- ]de[- ]France")]),
+    ("ARS Normandie", [re.compile(r"ARS\s+Normandie")]),
+    ("ARS Nouvelle-Aquitaine", [re.compile(r"ARS\s+Nouvelle[- ]Aquitaine")]),
+    ("ARS Guadeloupe", [re.compile(r"ARS\s+Guadeloupe")]),
+    ("ARS", [re.compile(r"\bARS\b")]),
+    ("CHU Grenoble Alpes", [re.compile(r"CHU\s+Grenoble\s+Alpes")]),
+    ("CHU de Lyon", [re.compile(r"CHU\s+de\s+Lyon")]),
+    ("AP-HP", [re.compile(r"\bAP-HP\b"), re.compile(r"Assistance Publique")]),
+    ("Commission européenne", [re.compile(r"Commission\s+europ[ée]enne")]),
 ]
+
+#: Announcer verbs that identify the organisation issuing the call.
+_ANNOUNCER_VERBS = re.compile(
+    r"\b(?:lance|soutient|finance|ouvre|porte|organise|propose|publie|"
+    r"met\s+en\s+place|co-public)\w*\b",
+    re.IGNORECASE,
+)
+
+
+def _org_in_snippet(snippet: str) -> Optional[str]:
+    """Return the canonical org whose pattern appears in ``snippet``."""
+    for canonical, pats in _ORG_NAMES:
+        for p in pats:
+            if p.search(snippet):
+                return canonical
+    return None
+
+
+def _detect_organisation(text: str) -> Optional[str]:
+    """Detect the AAP organisation, prioritising the issuing (announcer) body.
+
+    A call's real issuer normally *launches / funds / supports* it — that org
+    appears right before an announcer verb, or in the title line. Partner
+    institutions (CNRS, Inserm, …) that only appear later (eligibility, contact)
+    must not override the announcer.
+    """
+    # 1. Announcer: org immediately followed by a launch verb.
+    for canonical, pats in _ORG_NAMES:
+        for p in pats:
+            for m in p.finditer(text):
+                after = text[m.end():m.end() + 50]
+                if _ANNOUNCER_VERBS.search(after):
+                    return canonical
+
+    # 2. Issuer named in the title / opening line.
+    head = text[:200]
+    org = _org_in_snippet(head)
+    if org:
+        return org
+
+    # 3. Issuer in the very first line.
+    first_line = text.split("\n", 1)[0]
+    org = _org_in_snippet(first_line)
+    if org:
+        return org
+
+    # 4. Fallback: full-text abbreviation scan.
+    return _org_in_snippet(text)
+
+
+#: Geographical scope implied by the issuing organisation (domain prior: an ARS
+#: call is regional, the European Commission targets Europe, national research
+#: bodies — ANR, INCa, FRM, Fondations, Inserm, CNRS, CHU, AP-HP — default to
+#: France).
+_SCOPE_BY_ORG: dict[str, str] = {
+    "Commission européenne": "Europe",
+    "ARS Île-de-France": "Île-de-France",
+    "ARS Auvergne-Rhône-Alpes": "Auvergne-Rhône-Alpes",
+    "ARS Occitanie": "Occitanie",
+    "ARS Provence-Alpes-Côte d'Azur": "Provence-Alpes-Côte d'Azur",
+    "ARS PACA": "PACA",
+    "ARS Bretagne": "Bretagne",
+    "ARS Hauts-de-France": "Hauts-de-France",
+    "ARS Normandie": "Normandie",
+    "ARS Nouvelle-Aquitaine": "Nouvelle-Aquitaine",
+    "ARS Guadeloupe": "Guadeloupe",
+}
+_DEFAULT_SCOPE = "France"
+
+
+def _scope_for(organisation: Optional[str]) -> Optional[str]:
+    if not organisation:
+        return None
+    return _SCOPE_BY_ORG.get(organisation, _DEFAULT_SCOPE)
+
 
 # ---------------------------------------------------------------------------
 # Deadline: multiple keyword variants + date formats
@@ -124,6 +202,11 @@ _AMOUNT_MILLIONS_RE = re.compile(
     r"(?i)(?:montant(?:\s+(?:maximum|maximal|max|total|de|d'))?\s*:?\s*)?"
     r"([\d.,]+)\s*M€"
 )
+# Recurring: "22 000 € par an pendant 3 ans" (annual × duration)
+_AMOUNT_RECURRING_RE = re.compile(
+    r"(?i)(\d[\d\s\u00a0]*(?:[.,]\d+)?)\s*(?:€|euros?|EUR)\s+par\s+an"
+    r"(?:\s+(?:pendant|sur|pour))?\s*(\d+)\s+ans?"
+)
 
 # ---------------------------------------------------------------------------
 # Title and eligibility patterns
@@ -133,6 +216,9 @@ _TITLE_RE = re.compile(
     r"(?i)(?:appel\s+(?:à|a)\s+(?:projets?|candidatures?)|candidate)"
     r"\s*[:\-]?\s*(.+)"
 )
+# Official AAP call id, e.g. "HEALTH-2028" or "ANR-23-CE10" — used as the title
+# by funders (Horizon Europe style call identifiers).
+_AAP_CODE_RE = re.compile(r"\b[A-Z]{2,}-\d{4}\b")
 # Markdown heading: "# Title"
 _HEADING_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
 # "Org - Title" (short title after organisation dash, e.g. "INCa - Bourses de thèse 2027")
@@ -192,6 +278,11 @@ def _extract_dates(text: str, kw_re: re.Pattern, numeric: bool = False) -> list[
 
 def _extract_title(text: str) -> Optional[str]:
     """Extract a clean title using several structural signals."""
+    # 0. Official call id (e.g. "HEALTH-2028") takes precedence when present.
+    cm = _AAP_CODE_RE.search(text)
+    if cm:
+        return cm.group(0)
+
     # 1. Markdown heading
     hm = _HEADING_RE.search(text)
     if hm:
@@ -221,14 +312,15 @@ def _extract_title(text: str) -> Optional[str]:
 def _best_amount(text: str) -> tuple[Optional[int], Optional[str], int]:
     """Find the best amount candidate.
 
-    Strategy: prefer an amount written after a clear "Montant maximal" label,
-    with priority to colon-introduced labels (e.g. "Montant maximal : 520 000 €"),
-    then fall back to the first amount of any supported surface format.
+    Strategy:
+      * recurring annual grants ("22 000 € par an pendant 3 ans") sum to
+        annual \u00d7 duration;
+      * otherwise prefer an amount written right after a clear "Montant
+        maximal" label (colon-introduced first), taking the *nearest* amount to
+        the label so distracters elsewhere in the doc cannot win;
+      * finally fall back to the first amount of any supported surface format.
     Returns (amount, currency, span_start).
     """
-    label_re = re.compile(r"(?i)montant\s+(?:maximum|maximal|max|total)\s*:?")
-    colon_label_re = re.compile(r"(?i)montant\s+(?:maximum|maximal|max|total)\s*:")
-
     def _parse_match(m: re.Match) -> Optional[int]:
         full = m.group(0)
         if "M€" in full:
@@ -238,30 +330,49 @@ def _best_amount(text: str) -> tuple[Optional[int], Optional[str], int]:
                 return None
         return _parse_amount(m.group(1))
 
-    def _first_from(pos: int) -> Optional[int]:
+    def _amounts_from(pos: int) -> list[tuple[int, Optional[int]]]:
+        """All (start, value) amount candidates at or after ``pos``."""
         rest = text[pos:]
+        found: list[tuple[int, Optional[int]]] = []
         for pat in (_AMOUNT_STANDARD_RE, _AMOUNT_EUR_PREFIX_RE,
                     _AMOUNT_COMPACT_RE, _AMOUNT_MILLIONS_RE):
-            m = pat.search(rest)
-            if m:
+            for m in pat.finditer(rest):
                 val = _parse_match(m)
                 if val is not None:
-                    return val
-        return None
+                    found.append((pos + m.start(), val))
+        found.sort()
+        return found
+
+    def _nearest_from(pos: int) -> Optional[int]:
+        found = _amounts_from(pos)
+        return found[0][1] if found else None
+
+    # Priority 0: recurring annual grant → total over the duration.
+    rm = _AMOUNT_RECURRING_RE.search(text)
+    if rm:
+        try:
+            annual = _parse_amount(rm.group(1).replace(" ", ""))
+            years = int(rm.group(2))
+            if annual is not None and years > 0:
+                return annual * years, "EUR", rm.start()
+        except (ValueError, TypeError):
+            pass
 
     # Priority 1a: amount after a colon-introduced "Montant maximal :"
-    for lm in colon_label_re.finditer(text):
-        val = _first_from(lm.end())
-        if val is not None:
-            return val, "EUR", lm.end()
-
+    colon_label_re = re.compile(r"(?i)montant\s+(?:maximum|maximal|max|total)\s*:")
     # Priority 1b: amount after any labelled "Montant maximal" (no colon)
+    label_re = re.compile(r"(?i)montant\s+(?:maximum|maximal|max|total)\s*:?")
+
+    for lm in colon_label_re.finditer(text):
+        val = _nearest_from(lm.end())
+        if val is not None:
+            return val, "EUR", lm.end()
     for lm in label_re.finditer(text):
-        val = _first_from(lm.end())
+        val = _nearest_from(lm.end())
         if val is not None:
             return val, "EUR", lm.end()
 
-    # Priority 2: first match of any format anywhere
+    # Priority 2: first match of any format anywhere.
     for pat in (_AMOUNT_STANDARD_RE, _AMOUNT_EUR_PREFIX_RE,
                 _AMOUNT_COMPACT_RE, _AMOUNT_MILLIONS_RE):
         m = pat.search(text)
@@ -277,14 +388,6 @@ def _best_date(text: str, kw_re: re.Pattern, numeric: bool = False) -> Optional[
     """Find the first keyword-triggered date; returns ISO date or None."""
     dates = _extract_dates(text, kw_re, numeric=numeric)
     return dates[0][0] if dates else None
-
-
-def _detect_organisation(text: str) -> Optional[str]:
-    """Detect the AAP organisation from known abbreviations/full names."""
-    for pat, canonical in _ORG_ABBREVS:
-        if pat.search(text):
-            return canonical
-    return None
 
 
 # ---------------------------------------------------------------------------
@@ -324,6 +427,9 @@ class RegexExtractor:
         # --- Organisation ---
         organisation = _detect_organisation(text)
 
+        # --- Geographical scope ---
+        geographical_scope = _scope_for(organisation)
+
         prov = Provenance(
             source_url=document.source_url,
             source_text=text[:500],
@@ -333,6 +439,7 @@ class RegexExtractor:
         return AAPExtraction(
             title=title,
             organisation=organisation,
+            geographical_scope=geographical_scope,
             amount_max=amount_max,
             currency=currency,
             deadline=deadline,
