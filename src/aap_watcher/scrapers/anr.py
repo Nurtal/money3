@@ -15,10 +15,12 @@ from typing import Iterator, Optional
 from ..extraction.base import Document
 from .base import BaseScraper
 
-_LISTING_URL = "https://www.anr.fr/fr/les-appels-a-projets"
+_LISTING_URL = "https://anr.fr/fr/appels-a-projets/"
 
+# The ANR listing page wraps the whole page in one <article>; each call is a
+# dedicated <h2> carrying its own detail link.
 _ENTRY_RE = re.compile(
-    r"<article[^>]*>(?P<body>.*?)</article>", re.IGNORECASE | re.DOTALL
+    r"<h2[^>]*>(?P<body>.*?)</h2>", re.IGNORECASE | re.DOTALL
 )
 _LINK_RE = re.compile(r'href="(?P<url>https?://[^"]+)"', re.IGNORECASE)
 

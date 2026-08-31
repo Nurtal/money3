@@ -1,10 +1,13 @@
 """Generic source adapter.
 
-Most AAP listing pages share a shape: a list of entry blocks (``<article>`` or
-``<li>``) each linking to a detail page. This base covers that common case so
-concrete sources (INCa, ARS, foundations…) stay thin and independent. Each
-source only overrides its ``source_name`` and ``listing_url``. Live fetching
-respects robots.txt via :class:`BaseScraper`; tests inject raw HTML.
+Most AAP listing pages share a shape: a list of entry blocks, each linking to a
+detail page. Entries may be marked up as ``<article>``/``<li>`` (the default)
+but real sites frequently use a heading tag (``<h2>``/``<h3>``) per entry,
+sometimes carrying the ``<a href>`` itself (INCa, ARS, ANR, Fondation de
+France…). This base stays thin: each concrete source only overrides
+``source_name``, ``listing_url`` and optionally ``entry_block`` (a regex whose
+named group ``body`` delimits one entry). Live fetching respects robots.txt via
+:class:`BaseScraper`; tests inject raw HTML.
 """
 
 from __future__ import annotations
@@ -15,17 +18,20 @@ from typing import Iterator, Optional
 from ..extraction.base import Document
 from .base import BaseScraper, LINK_RE
 
-_BLOCK_RE = re.compile(r"<(?P<tag>article|li)[^>]*>(?P<body>.*?)</(?P=tag)>", re.IGNORECASE | re.DOTALL)
-
 
 class GenericSourceScraper(BaseScraper):
     source_name = "generic"
     listing_url = ""
+    #: Regex (with a named group ``body``) delimiting a single AAP entry.
+    entry_block: str = r"<(?P<tag>article|li)[^>]*>(?P<body>.*?)</(?P=tag)>"
 
     def discover(self, html: Optional[str] = None) -> Iterator[Document]:
         html = self.fetch(self.listing_url, html=html)
-        for match in _BLOCK_RE.finditer(html):
-            body = match.group("body")
+        block_re = re.compile(self.entry_block, re.IGNORECASE | re.DOTALL)
+        for match in block_re.finditer(html):
+            body = match.groupdict().get("body")
+            if body is None:
+                body = match.group(0)
             text = self.html_to_text(body)
             if not text.strip():
                 continue

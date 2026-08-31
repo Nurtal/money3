@@ -21,9 +21,8 @@ def repo(tmp_path):
 
 def test_deduplication_on_repeat_run(repo):
     html = """
-    <article><h2>Appel à projets : Unique 2027</h2>
+    <h2><a href="https://anr.fr/AAP/unique">Appel à projets : Unique 2027</a></h2>
     <p>Date limite : 15 octobre 2026. Montant maximum : 100 000 €.</p>
-    <a href="https://anr.fr/AAP/unique">lien</a></article>
     """
     scraper = ANRScraper()
     extractor = RegexExtractor()
@@ -38,9 +37,8 @@ def test_deduplication_on_repeat_run(repo):
 
 def test_raw_source_stored(repo):
     html = """
-    <article><h2>Appel à projets : Unique 2027</h2>
+    <h2><a href="https://anr.fr/AAP/unique">Appel à projets : Unique 2027</a></h2>
     <p>Date limite : 15 octobre 2026.</p>
-    <a href="https://anr.fr/AAP/unique">lien</a></article>
     """
     run_once(ANRScraper(), RegexExtractor(), repo, html=html)
     from aap_watcher.database.models import RawDocument
