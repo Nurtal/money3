@@ -18,7 +18,32 @@ from .base import Document, Extractor
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
 _TITLE_RE = re.compile(r"(?i)(?:appel\s+à\s+projets|appel\s+à\s+candidatures)\s*[:\-]?\s*(.+)")
 _ORG_RE = re.compile(r"\b([A-Z][A-Za-zÀ-ÿ]+(?:\s+[A-Z][A-Za-zÀ-ÿ]+){0,3})\b")
-_ELIG_KW = re.compile(r"(?i)(?:candidats?\s+éligibles|éligibilit|qui\s+peut\s+candidater|bénéficiaires?)")
+_ELIG_KW = re.compile(r"(?i)(?:candidats?\s+[ée]ligibles|[ée]ligibilit[ée]|qui\s+peut\s+candidater|b[ée]n[ée]ficiaires?)")
+# Org abbreviation lookups usable anywhere in the text (not only uppercase tokens)
+_ORG_DIRECT = [
+    (re.compile(r"\bANR\b"), "ANR"),
+    (re.compile(r"\bINCa\b"), "INCa"),
+    (re.compile(r"\bInserm\b", re.IGNORECASE), "Inserm"),
+    (re.compile(r"\bCNRS\b"), "CNRS"),
+    (re.compile(r"\bFRM\b"), "FRM"),
+    (re.compile(r"\bLigue\s+contre\s+le\s+[Cc]ancer\b"), "Ligue contre le Cancer"),
+    (re.compile(r"\bFondation\s+ARC\b"), "Fondation ARC"),
+    (re.compile(r"\bFondation\s+de\s+France\b"), "Fondation de France"),
+    (re.compile(r"\bARS\s+(Île-de-France|Ile-de-France)\b"), "ARS Île-de-France"),
+    (re.compile(r"\bARS\s+Auvergne[- ]Rh[ôo]ne[- ]Alpes\b"), "ARS Auvergne-Rhône-Alpes"),
+    (re.compile(r"\bARS\s+Occitanie\b"), "ARS Occitanie"),
+    (re.compile(r"\bARS\s+Provence[- ]Alpes[- ]C[ôo]te\s+d.Azur\b"), "ARS Provence-Alpes-Côte d'Azur"),
+    (re.compile(r"\bARS\s+Bretagne\b"), "ARS Bretagne"),
+    (re.compile(r"\bARS\s+Hauts[- ]de[- ]France\b"), "ARS Hauts-de-France"),
+    (re.compile(r"\bARS\s+Normandie\b"), "ARS Normandie"),
+    (re.compile(r"\bARS\s+Nouvelle[- ]Aquitaine\b"), "ARS Nouvelle-Aquitaine"),
+    (re.compile(r"\bARS\s+Guadeloupe\b"), "ARS Guadeloupe"),
+    (re.compile(r"\bARS\b"), "ARS"),
+    (re.compile(r"\bCHU\s+Grenoble\s+Alpes\b"), "CHU Grenoble Alpes"),
+    (re.compile(r"\bCHU\s+de\s+Lyon\b"), "CHU de Lyon"),
+    (re.compile(r"\bAP-HP\b"), "AP-HP"),
+    (re.compile(r"\bCommission\s+europ[ée]enne\b"), "Commission européenne"),
+]
 
 ORG_VOCAB = {
     "anr", "agence nationale de la recherche", "inca", "inserm", "cnrs",
@@ -40,14 +65,29 @@ class ClassicalNLPExtractor:
             title = tm.group(1).strip().rstrip(".")
 
         organisation = None
-        for sent in sentences:
-            for m in _ORG_RE.finditer(sent):
-                cand = m.group(1).strip().lower()
-                if cand in ORG_VOCAB:
-                    organisation = m.group(1).strip()
-                    break
-            if organisation:
+        for pat, canonical in _ORG_DIRECT:
+            if pat.search(text):
+                organisation = canonical
                 break
+        if not organisation:
+            for sent in sentences:
+                for m in _ORG_RE.finditer(sent):
+                    cand = m.group(1).strip().lower()
+                    # Map full-name vocab to canonical abbreviation
+                    canonical = {
+                        "anr": "ANR", "agence nationale de la recherche": "ANR",
+                        "inca": "INCa", "inserm": "Inserm", "cnrs": "CNRS",
+                        "fondation arc": "Fondation ARC",
+                        "fondation de france": "Fondation de France",
+                        "ligue contre le cancer": "Ligue contre le Cancer",
+                        "fondation pour la recherche médicale": "FRM",
+                        "ars": "ARS", "chu": "CHU",
+                    }.get(cand)
+                    if canonical:
+                        organisation = canonical
+                        break
+                if organisation:
+                    break
 
         eligibility = None
         for sent in sentences:

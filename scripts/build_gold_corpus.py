@@ -3578,7 +3578,1301 @@ Contact : entreprise@anr.fr""",
         },
         [Ent("DEADLINE", "10 avril 2027"), Ent("OPENING_DATE", "10 janvier 2027"), Ent("AMOUNT", "200 000 €")],
     ),
+    # ---- Phase 4 expansion: larger + harder examples (format variety) ----
+    Example(
+        "anr-isolant-2028", "test",
+        "https://anr.fr/fr/les-appels-a-projets/isolant-2028.html",
+"""\
+Appel à projets : Matériaux isolants du futur 2028
+
+L'Agence nationale de la recherche (ANR) lance l'appel à projets Matériaux isolants 2028.
+Ce programme finance la recherche sur les matériaux d'isolation thermique et acoustique.
+
+Date d'ouverture : 03/02/2028
+Date limite de dépôt : 30/04/2028
+Montant maximal : EUR 450 000
+Durée maximale : 42 mois
+
+Éligibilité : Équipes de recherche en matériaux, chimie et thermique.
+
+Contact : isolants@anr.fr""",
+        {
+            "title": "Matériaux isolants du futur 2028",
+            "organisation": "ANR",
+            "opening_date": "2028-02-03",
+            "deadline": "2028-04-30",
+            "amount_max": 450000,
+            "currency": "EUR",
+            "eligibility": "Équipes de recherche en matériaux, chimie et thermique.",
+            "eligible_applicants": ["équipes de recherche en matériaux", "chimie", "thermique"],
+            "research_topics": ["matériaux", "isolation thermique", "isolation acoustique"],
+            "geographical_scope": "France",
+            "funding_type": "subvention",
+        },
+        [Ent("OPENING_DATE", "03/02/2028"), Ent("DEADLINE", "30/04/2028"), Ent("AMOUNT", "EUR 450 000")],
+    ),
+    Example(
+        "anr-batterie-2028", "train",
+        "https://anr.fr/fr/les-appels-a-projets/batterie-2028.html",
+"""\
+Appel à projets : Batteries nouvelle génération 2028
+
+L'Agence nationale de la recherche (ANR) lance l'appel à projets Batteries nouvelle génération.
+Ce programme finance la recherche sur les batteries solides et la gestion intelligente de l'énergie.
+
+Date d'ouverture : 1er mars 2028
+Date limite de dépôt : 15.06.2028
+Montant maximal : 1200000€
+Durée maximale : 48 mois
+
+Éligibilité : Équipes de recherche en électrochimie et énergie.
+
+Contact : batteries@anr.fr""",
+        {
+            "title": "Batteries nouvelle génération 2028",
+            "organisation": "ANR",
+            "opening_date": "2028-03-01",
+            "deadline": "2028-06-15",
+            "amount_max": 1200000,
+            "currency": "EUR",
+            "eligibility": "Équipes de recherche en électrochimie et énergie.",
+            "eligible_applicants": ["équipes de recherche en électrochimie", "énergie"],
+            "research_topics": ["batteries solides", "gestion de l'énergie"],
+            "geographical_scope": "France",
+            "funding_type": "subvention",
+        },
+        [Ent("OPENING_DATE", "1er mars 2028"), Ent("DEADLINE", "15.06.2028"), Ent("AMOUNT", "1200000€")],
+    ),
+    # ---- Phase 4: distractors (secondary amount/date must not be extracted)
+    Example(
+        "anr-photonique-2028", "test",
+        "https://anr.fr/fr/les-appels-a-projets/photonique-2028.html",
+"""\
+Appel à projets : Photonique et capteurs 2028
+
+L'Agence nationale de la recherche (ANR) lance l'appel à projets Photonique et capteurs 2028.
+L'édition précédente (2026) avait octroyé un montant maximal de 300 000 € par projet ;
+pour cette édition, le budget a été revu à la hausse.
+
+Date d'ouverture : 1er février 2028
+Date limite de dépôt : 15 avril 2028
+Montant maximal : 520 000 €
+Durée maximale : 36 mois
+
+Éligibilité : Chercheurs en photonics et instrumentation.
+
+Contact : photonique@anr.fr""",
+        {
+            "title": "Photonique et capteurs 2028",
+            "organisation": "ANR",
+            "opening_date": "2028-02-01",
+            "deadline": "2028-04-15",
+            "amount_max": 520000,
+            "currency": "EUR",
+            "eligibility": "Chercheurs en photonics et instrumentation.",
+            "eligible_applicants": ["chercheurs en photonics", "instrumentation"],
+            "research_topics": ["photonique", "capteurs"],
+            "geographical_scope": "France",
+            "funding_type": "subvention",
+        },
+        [Ent("OPENING_DATE", "1er février 2028"), Ent("DEADLINE", "15 avril 2028"), Ent("AMOUNT", "520 000 €")],
+    ),
+    # ---- Phase 4: missing fields (no deadline) ----
+    Example(
+        "anr-permanent-2028", "train",
+        "https://anr.fr/fr/les-appels-a-projets/permanent-2028.html",
+"""\
+Appel à projets : Programme permanent 2028
+
+L'Agence nationale de la recherche (ANR) lance le programme permanent non thématique.
+Cet appel est ouvert en continu : il n'y a pas de date limite de dépôt.
+
+Date d'ouverture : 15 janvier 2028
+Montant maximal : 200 000 €
+Durée maximale : 36 mois
+
+Éligibilité : Toutes équipes de recherche des établissements publics.
+
+Contact : permanent@anr.fr""",
+        {
+            "title": "Programme permanent 2028",
+            "organisation": "ANR",
+            "opening_date": "2028-01-15",
+            "amount_max": 200000,
+            "currency": "EUR",
+            "eligibility": "Toutes équipes de recherche des établissements publics.",
+            "eligible_applicants": ["équipes de recherche des établissements publics"],
+            "research_topics": ["non thématique"],
+            "geographical_scope": "France",
+            "funding_type": "subvention",
+        },
+        [Ent("OPENING_DATE", "15 janvier 2028"), Ent("AMOUNT", "200 000 €")],
+    ),
+    # ---- Phase 4: organisation variant (full name in prose, short in field)
+    Example(
+        "frm-etiologie-2028", "test",
+        "https://www.frm.org/appels-a-projets/etiologie-2028",
+"""\
+Appel à projets : Étiologie des maladies rares 2028
+
+La Fondation pour la Recherche Médicale (FRM) lance l'appel à projets Étiologie des maladies rares.
+
+Date d'ouverture : 5 mars 2028
+Date limite de dépôt : 20 juin 2028
+Montant maximal : 350 000 €
+
+Éligibilité : Équipes de recherche en génétique et biologie moléculaire.
+
+Contact : etiologie@frm.org""",
+        {
+            "title": "Étiologie des maladies rares 2028",
+            "organisation": "FRM",
+            "opening_date": "2028-03-05",
+            "deadline": "2028-06-20",
+            "amount_max": 350000,
+            "currency": "EUR",
+            "eligibility": "Équipes de recherche en génétique et biologie moléculaire.",
+            "eligible_applicants": ["équipes de recherche en génétique", "biologie moléculaire"],
+            "research_topics": ["maladies rares", "étiologie"],
+            "geographical_scope": "France",
+            "funding_type": "subvention",
+        },
+        [Ent("OPENING_DATE", "5 mars 2028"), Ent("DEADLINE", "20 juin 2028"), Ent("AMOUNT", "350 000 €")],
+    ),
 ]
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 corpus expansion: larger + harder corpus (~200 examples).
+#
+# New examples deliberately increase complexity along five axes that were
+# under-represented in v1 (which was intentionally homogeneous):
+#   1. format variety        – amounts in EUR-prefix / compact / ranges / M€,
+#                              dates in dd/mm/yyyy, "avant le", "au plus tard", "1er";
+#   2. distractors           – other amounts/dates in the prose that must NOT
+#                              be extracted (only the true one is annotated);
+#   3. missing fields        – an AAP may have no deadline / no amount / no
+#                              opening date (field omitted from ``expected``);
+#   4. organisation variants – abbreviation vs full name in the prose;
+#   5. longer/realistic docs – closer to real HTML: headings, bullet lists,
+#                              extra noise (lot numbers, contacts, annexes).
+#
+# The helpers below build the document prose from the same values used for the
+# ``expected`` dict and entity spans, so offsets always line up (checked in
+# main()).
+# ---------------------------------------------------------------------------
+
+_MONTHS_FR = [
+    "janvier", "février", "mars", "avril", "mai", "juin",
+    "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+]
+
+
+def _amount_prose(amount: int, variant: int) -> str:
+    """Render an integer amount in one of several surface formats.
+
+     0: "400 000 €"      (spaced, euro suffix)
+     1: "400 000 €"      (same — space kept)
+     2: "EUR 400 000"    (prefix)
+     3: "400000€"        (compact, no thousands separator)
+     4: "0.4 M€"         (millions shorthand, only valid for round millions)
+    """
+    thousands = f"{amount:,}".replace(",", " ")
+    if variant == 0:
+        return f"{thousands} €"
+    if variant == 2:
+        return f"EUR {thousands}"
+    if variant == 3:
+        return f"{amount}€"
+    if variant == 4:
+        return f"{amount / 1_000_000:g} M€"
+    return f"{thousands} €"
+
+
+def _date_prose(day: int, month: int, year: int, variant: int = 0) -> str:
+    """Render a date (month is 1-12 int) in one of several surface formats.
+
+     0: "5 mars 2028"
+     1: "05/03/2028"
+     2: "05.03.2028"
+     3: "avant le 5 mars 2028"      (deadline-style phrasings handled elsewhere)
+     4: "5 mars 2028 à 17h00"
+    """
+    mfull = _MONTHS_FR[month - 1]
+    if variant == 1:
+        return f"{day:02d}/{month:02d}/{year}"
+    if variant == 2:
+        return f"{day:02d}.{month:02d}.{year}"
+    if variant == 4:
+        return f"{day} {mfull} {year} à 17h00"
+    return f"{day} {mfull} {year}"
+
+
+def _build_doc(
+    title: str,
+    org_full: str,
+    org_abbr: str,
+    body_paras: list[str],
+    deadline_line: str | None,
+    opening_line: str | None,
+    amount_line: str | None,
+    distract: tuple[str, str] | None = None,
+    extra_body: list[str] | None = None,
+    realistic: bool = False,
+) -> str:
+    """Assemble a realistic-looking AAP document.
+
+    In ``realistic`` mode the result looks closer to a scraped web page:
+    sections with headings, bullet lists, budget/timeline blocks and contact
+    footer. In compact mode it stays a short, clean paragraph-style doc.
+    """
+    if realistic:
+        sec = []
+        sec.append(f"# {title}")
+        sec.append("")
+        sec.append(
+            f"{org_full} ({org_abbr}) lance un appel à projets sur le thème "
+            f"« {title} ». Objectifs : financer et structurer des projets de "
+            f"recherche dans le domaine concerné, favoriser les consortiums et "
+            f"accompagner l'émergence de nouvelles équipes."
+        )
+        sec.append("")
+        sec.append("## Contexte")
+        sec.append("")
+        sec.extend(body_paras)
+        if distract:
+            sec.append("")
+            sec.append("Chiffres de référence :")
+            distr_txt, _ = distract
+            sec.append(f"- {distr_txt}")
+        if extra_body:
+            sec.append("")
+            sec.extend(extra_body)
+        sec.append("")
+        sec.append("## Informations pratiques")
+        sec.append("")
+        sec.append("- Durée du projet : 36 mois")
+        if opening_line:
+            sec.append(f"- Date d'ouverture : {opening_line}")
+        if deadline_line:
+            sec.append(f"- Date limite de dépôt : {deadline_line}")
+        if amount_line:
+            sec.append(f"- Montant maximal par projet : {amount_line}")
+        sec.append("")
+        sec.append("## Candidature")
+        sec.append("")
+        sec.append("Les dossiers sont déposés en ligne. Le comité scientifique "
+                   "se réunit après la clôture pour sélectionner les lauréats.")
+        sec.append("")
+        sec.append("Contact : aap-2028@example.org")
+        return "\n".join(sec)
+
+    parts = [f"Appel à projets : {title}", ""]
+    parts.append(
+        f"{org_full} ({org_abbr}) lance l'appel à projets {title} "
+        f"dans le cadre de son programme annuel."
+    )
+    parts.append("")
+    parts.extend(body_paras)
+    if opening_line or deadline_line or amount_line:
+        parts.append("")
+        parts.append("Informations pratiques :")
+        parts.append("")
+    if opening_line:
+        parts.append(f"Date d'ouverture : {opening_line}")
+    if deadline_line:
+        parts.append(f"Date limite de dépôt : {deadline_line}")
+    if amount_line:
+        parts.append(f"Montant maximal : {amount_line}")
+    if distract:
+        parts.append("")
+        parts.append(distract[0])
+    if extra_body:
+        parts.append("")
+        parts.extend(extra_body)
+    parts.append("")
+    parts.append("Contact : appel-2028@example.org")
+    return "\n".join(parts)
+
+
+def _mk_example(
+    eid: str,
+    split: str,
+    url: str,
+    title: str,
+    org: str,
+    org_full: str,
+    body: list[str] | None = None,
+    deadline: dict | None = None,
+    opening: dict | None = None,
+    amount: dict | None = None,
+    extra: dict | None = None,
+    expected_extra: dict | None = None,
+    distract: tuple[str, str] | None = None,
+    realistic: bool = False,
+) -> Example:
+    """Build an Example with prose generated from its own annotations.
+
+    ``deadline`` / ``opening``: {"day", "month"(1-12 int), "year", "variant",
+        optional "phrase" like "avant le " to prefix the prose line; the NER
+        span then covers only the bare date, which stays a substring}.
+    ``amount``: {"value", "variant", optional "min"} — ``min`` sets amount_min.
+    ``extra``: {"ents": [...], "body_paras": [...]} extra NER spans / paragraphs.
+    ``distract``: (prose, label) an extra amount/date/label that appears in the
+        doc but is correctly not used for the structured field; it is still
+        labelled at NER level where the label matches.
+    ``realistic``: produce a longer, HTML-ish doc (bullets, noise sections).
+    """
+    deadline_line = None
+    opening_line = None
+    amount_line = None
+    ents: list[Ent] = []
+
+    if deadline:
+        phrase = deadline.get("phrase", "")
+        deadline_line = phrase + _date_prose(deadline["day"], deadline["month"], deadline["year"], deadline.get("variant", 0))
+        ents.append(Ent("DEADLINE", _date_prose(deadline["day"], deadline["month"], deadline["year"], deadline.get("variant", 0))))
+    if opening:
+        phrase = opening.get("phrase", "")
+        opening_line = phrase + _date_prose(opening["day"], opening["month"], opening["year"], opening.get("variant", 0))
+        ents.append(Ent("OPENING_DATE", _date_prose(opening["day"], opening["month"], opening["year"], opening.get("variant", 0))))
+    if amount:
+        v = amount.get("variant", 0)
+        amount_line = _amount_prose(amount["value"], v)
+        ents.append(Ent("AMOUNT", amount_line))
+
+    extra_body: list[str] = []
+    if extra:
+        if extra.get("ents"):
+            ents.extend(extra["ents"])
+        if extra.get("body_paras"):
+            extra_body = extra["body_paras"]
+
+    text = _build_doc(
+        title,
+        org_full,
+        org,
+        body,
+        deadline_line,
+        opening_line,
+        amount_line,
+        distract=distract,
+        extra_body=extra_body,
+        realistic=realistic,
+    )
+
+    expected = {
+        "title": title,
+        "organisation": org,
+    }
+    if opening:
+        expected["opening_date"] = f"{opening['year']:04d}-{opening['month']:02d}-{opening['day']:02d}"
+    if deadline:
+        expected["deadline"] = f"{deadline['year']:04d}-{deadline['month']:02d}-{deadline['day']:02d}"
+    if amount:
+        expected["amount_max"] = amount["value"]
+        if "min" in amount:
+            expected["amount_min"] = amount["min"]
+
+    # Defaults shared by most examples.
+    expected.setdefault("currency", "EUR")
+    expected.setdefault("geographical_scope", "France")
+    expected.setdefault("funding_type", "subvention")
+    if expected_extra:
+        expected.update(expected_extra)
+    return Example(eid, split, url, text, expected, ents)
+
+
+# ---------------------------------------------------------------------------
+# Programmatically generated "harder" examples (Phase 4).
+#
+# Each entry is a compact spec; _mk_example builds consistent prose so the NER
+# spans and structured ``expected`` always agree. They are appended to the
+# hand-written EXAMPLES so the corpus grows to ~200 while keeping v1 intact.
+# Five axes are exercised: alternative formats, distractors, missing fields,
+# organisation-name variants and long/realistic documents.
+# ---------------------------------------------------------------------------
+
+def _ex(specs):
+    """Convert a list of _mk_example kwargs into Example objects."""
+    out = []
+    for s in specs:
+        eid = s.pop("id")
+        split = s.pop("split", "test")
+        url = s.pop("url")
+        out.append(_mk_example(eid, split, url, **s))
+    return out
+
+
+_PROG_EXAMPLES: list[Example] = []
+
+
+# -- ANR: alternative amount + date formats, some compact, some with phrases --
+_PROG_EXAMPLES += _ex([
+    dict(id="anr-quantique-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/quantique-2029.html",
+         title="Calcul quantique 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Ce programme finance les recherches sur les processeurs à qubits supraconducteurs.",
+               "La thématique couvre également la correction d'erreurs et les algorithmes hybrides."],
+         deadline=dict(day=12, month=9, year=2029, variant=1),
+         opening=dict(day=1, month=4, year=2029),
+         amount=dict(value=600000, variant=3)),
+    dict(id="anr-ia-sante-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/ia-sante-2029.html",
+         title="IA pour la santé 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Cet appel soutient l'intégration de l'intelligence artificielle dans le parcours de soins."],
+         deadline=dict(day=30, month=6, year=2029, phrase="au plus tard le "),
+         opening=dict(day=15, month=1, year=2029),
+         amount=dict(value=750000, variant=2, min=150000)),
+    dict(id="anr-ocean-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/ocean-2029.html",
+         title="Observatoire de l'océan 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Programme pluridisciplinaire sur le rôle des océans dans la régulation climatique."],
+         deadline=dict(day=20, month=11, year=2029, variant=2),
+         opening=dict(day=5, month=5, year=2029, phrase="à compter du "),
+         amount=dict(value=850000, variant=4, min=400000)),
+    dict(id="anr-agroecologie-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/agroecologie-2029.html",
+         title="Agroécologie et sols 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Soutien à la recherche sur les pratiques agricoles régénératrices et la santé des sols."],
+         deadline=dict(day=10, month=8, year=2029, phrase="avant le "),
+         opening=dict(day=1, month=3, year=2029),
+         amount=dict(value=480000, variant=0)),
+    dict(id="anr-ville-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/ville-2029.html",
+         title="Ville durable 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["La recherche sur la ville durable associe urbanisme, énergie et mobilités."],
+         deadline=dict(day=25, month=7, year=2029, variant=1),
+         opening=dict(day=10, month=2, year=2029),
+         amount=dict(value=540000, variant=2)),
+    dict(id="anr-materiaux-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/materiaux-2029.html",
+         title="Matériaux avancés 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Ce programme finance la conception de matériaux nanostructurés pour l'aéronautique."],
+         deadline=dict(day=15, month=10, year=2029),
+         opening=dict(day=15, month=4, year=2029),
+         amount=dict(value=1200000, variant=3, min=300000)),
+    dict(id="anr-biodiversite-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/biodiversite-2029.html",
+         title="Biodiversité et climat 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Soutien à l'étude des interactions entre perte de biodiversité et changement climatique."],
+         deadline=dict(day=28, month=2, year=2029, variant=4),
+         opening=dict(day=1, month=9, year=2028),
+         amount=dict(value=390000, variant=0)),
+    dict(id="anr-demographie-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/demographie-2029.html",
+         title="Démographie et santé 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Recherche sur les interactions entre dynamiques démographiques et systèmes de santé."],
+         deadline=dict(day=8, month=12, year=2029, phrase="au plus tard le "),
+         opening=dict(day=1, month=7, year=2029, variant=1),
+         amount=dict(value=260000, variant=2)),
+    dict(id="anr-mathfi-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/mathfi-2029.html",
+         title="Mathématiques financières 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Appel dédié à la modélisation mathématique dans la finance et l'assurance."],
+         deadline=dict(day=3, month=5, year=2029, variant=1),
+         opening=dict(day=3, month=11, year=2028),
+         amount=dict(value=180000, variant=3)),
+    dict(id="anr-neurotech-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/neurotech-2029.html",
+         title="Technologies neurales 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Financement des interfaces cerveau-machine et des neurotechnologies appliquées."],
+         deadline=dict(day=17, month=6, year=2029, phrase="avant le "),
+         opening=dict(day=2, month=1, year=2029, variant=2),
+         amount=dict(value=920000, variant=4)),
+])
+
+
+# -- ANR: distractors (the tricky amounts/dates must be ignored) --
+_PROG_EXAMPLES += _ex([
+    dict(id="anr-energie-distrac-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/energie-distrac-2029.html",
+         title="Transition énergétique 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Dans l'édition 2026, le montant maximal accordé était 300 000 €. "
+               "Pour 2029 le comité a réévalué l'enveloppe totaale."],
+         deadline=dict(day=14, month=4, year=2029, variant=1),
+         opening=dict(day=14, month=1, year=2029),
+         amount=dict(value=520000, variant=0),
+         distract=("L'édition 2026 avait une enveloppe de 300 000 € par projet.", "AMOUNT")),
+    dict(id="anr-astro-distrac-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/astro-distrac-2029.html",
+         title="Astrophysique des hautes énergies 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Un précédent appel (2025) clôturait le 30 juin 2025. "
+               "La présente campagne fixe de nouvelles échéances."],
+         deadline=dict(day=30, month=6, year=2029),
+         opening=dict(day=1, month=2, year=2029),
+         amount=dict(value=680000, variant=2),
+         distract=("Le millésime 2025 clôturait au 30/06/2025.", "DEADLINE")),
+    dict(id="anr-pharma-distrac-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/pharma-distrac-2029.html",
+         title="Pharmaco-épidémiologie 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Deux montants sont souvent cités : un plafond théorique et une dotation réelle."],
+         deadline=dict(day=21, month=9, year=2029, variant=1),
+         opening=dict(day=21, month=3, year=2029),
+         amount=dict(value=440000, variant=0, min=120000),
+         distract=("Certains rapports mentionnent jusqu'à 700 000 €.", "AMOUNT")),
+    dict(id="anr-clim-distrac-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/clim-distrac-2029.html",
+         title="Modélisation climatique 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["La campagne antérieure avait une échéance en janvier. Les dates ci-dessous font foi."],
+         deadline=dict(day=11, month=12, year=2029, phrase="au plus tard le "),
+         opening=dict(day=11, month=6, year=2029),
+         amount=dict(value=360000, variant=3),
+         distract=("L'ancienne fenêtre allait jusqu'au 12/01/2029.", "DEADLINE")),
+])
+
+
+# -- INCa: missing fields and org-name variants --
+_PROG_EXAMPLES += _ex([
+    dict(id="inca-ouvert-continu-2029", split="test",
+         url="https://www.e-cancer.fr/appels-a-projets/ouvert-continu-2029",
+         title="Aide aux plateformes 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Appel permanent ouvert en continu à destination des plateformes de ressources biologiques."],
+         opening=dict(day=1, month=1, year=2029),
+         amount=dict(value=250000, variant=0)),
+    dict(id="inca-mitotique-2029", split="train",
+         url="https://www.e-cancer.fr/appels-a-projets/mitotique-2029",
+         title="Amitose et mitose 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Soutien à la recherche fondamentale sur les divisions cellulaires anormales."],
+         deadline=dict(day=15, month=5, year=2029, variant=1),
+         opening=dict(day=15, month=2, year=2029),
+         amount=dict(value=320000, variant=0)),
+    dict(id="inca-recherche-clinique-2029", split="test",
+         url="https://www.e-cancer.fr/appels-a-projets/recherche-clinique-2029",
+         title="Nouvelles thérapies 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Financement d'essais cliniques de phase précoce en oncologie."],
+         deadline=dict(day=30, month=9, year=2029, phrase="avant le "),
+         opening=dict(day=1, month=6, year=2029),
+         amount=dict(value=500000, variant=2, min=100000)),
+    dict(id="inca-bio-2029", split="train",
+         url="https://www.e-cancer.fr/appels-a-projets/bio-2029",
+         title="Biologie des tumeurs 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Approches multi-omiques pour caractériser l'hétérogénéité tumorale."],
+         deadline=dict(day=7, month=8, year=2029, variant=1),
+         opening=dict(day=7, month=3, year=2029),
+         amount=dict(value=280000, variant=3)),
+])
+
+
+# -- ARS: various regions, format + missing fields --
+_PROG_EXAMPLES += _ex([
+    dict(id="ars-idf-securite-2029", split="test",
+         url="https://www.iledefrance.ars.sante.fr/ars-idf-securite-2029",
+         title="Qualité et sécurité des soins 2029", org="ARS Île-de-France",
+         org_full="Agence régionale de santé Île-de-France",
+         body=["Appel à projets régional destiné aux structures hospitalières et médico-sociales."],
+         deadline=dict(day=18, month=4, year=2029, variant=1),
+         opening=dict(day=18, month=1, year=2029),
+         amount=dict(value=150000, variant=0),
+         expected_extra=dict(geographical_scope="Île-de-France")),
+    dict(id="ars-ara-numerique-2029", split="train",
+         url="https://www.auvergne-rhone-alpes.ars.sante.fr/ars-ara-numerique-2029",
+         title="E-santé territoriale 2029", org="ARS Auvergne-Rhône-Alpes",
+         org_full="Agence régionale de santé Auvergne-Rhône-Alpes",
+         body=["Soutien à la structuration de l'e-santé dans les territoires en tension démographique."],
+         deadline=dict(day=26, month=6, year=2029, phrase="au plus tard le "),
+         opening=dict(day=26, month=2, year=2029, variant=2),
+         amount=dict(value=210000, variant=2),
+         expected_extra=dict(geographical_scope="Auvergne-Rhône-Alpes")),
+    dict(id="ars-occitanie-prevention-2029", split="test",
+         url="https://www.occitanie.ars.sante.fr/ars-occitanie-prevention-2029",
+         title="Prévention bucco-dentaire 2029", org="ARS Occitanie",
+         org_full="Agence régionale de santé Occitanie",
+         body=["Appel visant à renforcer la prévention en santé bucco-dentaire chez les jeunes."],
+         deadline=dict(day=9, month=5, year=2029, variant=1),
+         opening=dict(day=9, month=2, year=2029),
+         amount=dict(value=95000, variant=3),
+         expected_extra=dict(geographical_scope="Occitanie")),
+    dict(id="ars-paca-geriatrie-2029", split="train",
+         url="https://www.paca.ars.sante.fr/ars-paca-geriatrie-2029",
+         title="Filière gériatrique 2029", org="ARS Provence-Alpes-Côte d'Azur",
+         org_full="Agence régionale de santé Provence-Alpes-Côte d'Azur",
+         body=["Développement des filières gériatriques et de l'adaptation des parcours."],
+         deadline=dict(day=22, month=7, year=2029),
+         opening=dict(day=22, month=3, year=2029),
+         amount=dict(value=175000, variant=0),
+         expected_extra=dict(geographical_scope="Provence-Alpes-Côte d'Azur")),
+    dict(id="ars-nouvelle-aquitaine-psy-2029", split="test",
+         url="https://www.nouvelle-aquitaine.ars.sante.fr/ars-na-psy-2029",
+         title="Santé mentale des jeunes 2029", org="ARS Nouvelle-Aquitaine",
+         org_full="Agence régionale de santé Nouvelle-Aquitaine",
+         body=["Appel régional pour renforcer l'offre de soins en santé mentale des 12-25 ans."],
+         opening=dict(day=1, month=4, year=2029),
+         amount=dict(value=130000, variant=2),
+         expected_extra=dict(geographical_scope="Nouvelle-Aquitaine")),
+    dict(id="ars-guadeloupe-depistage-2029", split="train",
+         url="https://www.guadeloupe.ars.sante.fr/ars-guadeloupe-depistage-2029",
+         title="Dépistage des cancers 2029", org="ARS Guadeloupe",
+         org_full="Agence régionale de santé Guadeloupe",
+         body=["Programme régional d'amélioration du dépistage organisé des cancers."],
+         deadline=dict(day=13, month=11, year=2029, variant=1),
+         opening=dict(day=13, month=6, year=2029),
+         amount=dict(value=110000, variant=0),
+         expected_extra=dict(geographical_scope="Guadeloupe")),
+])
+
+
+# -- Fondation ARC, FRM, Ligue, Fondation de France --
+_PROG_EXAMPLES += _ex([
+    dict(id="fondation-arc-immuno-2029", split="test",
+         url="https://www.fondation-arc.org/appels-a-projets/immuno-2029",
+         title="Immunothérapie combinée 2029", org="Fondation ARC",
+         org_full="Fondation ARC pour la recherche sur le cancer",
+         body=["Appel sur les combinaisons d'immunothérapies et la résistance tumorale."],
+         deadline=dict(day=16, month=9, year=2029, variant=1),
+         opening=dict(day=16, month=2, year=2029),
+         amount=dict(value=420000, variant=2, min=120000)),
+    dict(id="frm-urticaire-2029", split="train",
+         url="https://www.frm.org/appels-a-projets/urticaire-2029",
+         title="Maladies inflammatoires 2029", org="FRM", org_full="Fondation pour la Recherche Médicale",
+         body=["Soutien à la recherche sur les mécanismes de l'inflammation chronique."],
+         deadline=dict(day=8, month=10, year=2029, phrase="avant le "),
+         opening=dict(day=8, month=4, year=2029),
+         amount=dict(value=230000, variant=0)),
+    dict(id="ligue-cancer-genomique-2029", split="test",
+         url="https://www.ligue-cancer.net/appels-a-projets/genomique-2029",
+         title="Génomique des cancers 2029", org="Ligue contre le Cancer",
+         org_full="Ligue contre le cancer",
+         body=["Recherche translationnelle en génomique des tumeurs solides et hématologiques."],
+         deadline=dict(day=27, month=5, year=2029, variant=1),
+         opening=dict(day=27, month=1, year=2029),
+         amount=dict(value=310000, variant=3)),
+    dict(id="fondation-france-handicap-2029", split="test",
+         url="https://www.fondationdefrance.org/appels-a-projets/handicap-2029",
+         title="Inclusion et handicap 2029", org="Fondation de France",
+         org_full="Fondation de France",
+         body=["Appel pour l'innovation sociale en faveur de l'inclusion des personnes handicapées."],
+         deadline=dict(day=31, month=3, year=2029, variant=1),
+         opening=dict(day=2, month=12, year=2028),
+         amount=dict(value=80000, variant=0)),
+])
+
+
+# -- Horizon Europe (English-leaning / mixed French) --
+_PROG_EXAMPLES += _ex([
+    dict(id="horizon-europe-cancer-2029", split="test",
+         url="https://ec.europa.eu/horizon-europe/cancer-2029",
+         title="Mission Cancer 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Appel dans le cadre de la Mission Cancer Europe, coordination de projets de recherche clinique."],
+         deadline=dict(day=14, month=5, year=2029, variant=1),
+         opening=dict(day=2, month=1, year=2029),
+         amount=dict(value=8000000, variant=4, min=2000000),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="horizon-europe-vert-2029", split="train",
+         url="https://ec.europa.eu/horizon-europe/vert-2029",
+         title="Pacte vert et énergie 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Transitions énergétiques, biodiversité et économie circulaire."],
+         deadline=dict(day=24, month=9, year=2029, phrase="au plus tard le "),
+         opening=dict(day=24, month=3, year=2029),
+         amount=dict(value=6500000, variant=4),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="horizon-europe-marits-2029", split="test",
+         url="https://ec.europa.eu/horizon-europe/marits-2029",
+         title="Marie Skłodowska-Curie 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Bourses postdoctorales européennes pour la mobilité des chercheurs."],
+         deadline=dict(day=11, month=6, year=2029, variant=1),
+         opening=dict(day=9, month=1, year=2029),
+         amount=dict(value=210000, variant=0),
+         expected_extra=dict(funding_type="bourse", geographical_scope="Europe")),
+])
+
+
+# -- Inserm / CNRS: org variants + realistic long documents --
+_PROG_EXAMPLES += _ex([
+    dict(id="inserm-epigenetique-2029", split="test",
+         url="https://www.inserm.fr/appels-a-projets/epigenetique-2029",
+         title="Épigénétique et vieillissement 2029", org="Inserm",
+         org_full="Institut national de la santé et de la recherche médicale",
+         body=["Un appel ciblant les mécanismes épigénétiques du vieillissement cellulaire et du déclin fonctionnel.",
+               "Les équipes associées à des plateformes de séquençage à haut débit."],
+         deadline=dict(day=19, month=7, year=2029, variant=1),
+         opening=dict(day=2, month=2, year=2029),
+         amount=dict(value=460000, variant=2, min=140000)),
+    dict(id="inserm-cardiovac-2029", split="train",
+         url="https://www.inserm.fr/appels-a-projets/cardiovac-2029",
+         title="Cœur et vaisseaux 2029", org="Inserm",
+         org_full="Institut national de la santé et de la recherche médicale",
+         body=["Recherche sur les maladies cardiovasculaires et leurs déterminants."],
+         deadline=dict(day=2, month=12, year=2029, phrase="avant le "),
+         opening=dict(day=2, month=6, year=2029),
+         amount=dict(value=380000, variant=0)),
+    dict(id="cnrs-photonics-2029", split="test",
+         url="https://www.cnrs.fr/appels-a-projets/photonics-2029",
+         title="Photonique intégrée 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["Mission ressort du périmètre du CNRS pour la photonique sur silicium."],
+         deadline=dict(day=28, month=4, year=2029, variant=1),
+         opening=dict(day=2, month=12, year=2028),
+         amount=dict(value=270000, variant=3)),
+    dict(id="inserm-neuropsy-2029-real", split="test",
+         url="https://www.inserm.fr/appels-a-projets/neuropsy-2029",
+         title="Troubles neuropsychiatriques 2029", org="Inserm",
+         org_full="Institut national de la santé et de la recherche médicale",
+         body=["Ce programme finance des projets interdisciplinaires combinant imagerie cérébrale, "
+               "biomarqueurs et essais thérapeutiques précoces.", "",
+               "Sont éligibles les équipes labellisées Inserm, les universités et les instituts hospitalo-universitaires.",
+               "Les consortiums associant au moins deux institutions sont privilégiés."],
+         deadline=dict(day=5, month=9, year=2029, variant=1),
+         opening=dict(day=5, month=3, year=2029, variant=2),
+         amount=dict(value=910000, variant=4, min=300000),
+         realistic=True),
+    dict(id="cnrs-ocean-real-2029", split="train",
+         url="https://www.cnrs.fr/appels-a-projets/ocean-2029",
+         title="Océanographie de demain 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["L'appel accompagne le déploiement de capteurs autonomes et d'observatoires fond de mer.", "",
+               "Thématiques : acoustique sous-marine, optique marine, métrologie, traitement du signal.",
+               "Une attention particulière est portée aux projets à fort potentiel de transfert."],
+         deadline=dict(day=12, month=10, year=2029, phrase="au plus tard le "),
+         opening=dict(day=12, month=4, year=2029),
+         amount=dict(value=720000, variant=0, min=180000),
+         realistic=True),
+])
+
+
+# -- Batch 2: more sources, more axes (targets ~200) --
+_PROG_EXAMPLES += _ex([
+    # ANR: more format + distractor variety
+    dict(id="anr-crise-sante-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/crise-sante-2029.html",
+         title="Préparation aux crises 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Programme de recherche sur la préparation des systèmes de santé aux crises épidémiques."],
+         deadline=dict(day=6, month=5, year=2029, variant=1),
+         opening=dict(day=6, month=12, year=2028),
+         amount=dict(value=450000, variant=2, min=100000)),
+    dict(id="anr-gravite-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/gravite-2029.html",
+         title="Gravité et cosmologie 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Cet appel vise la physique fondamentale et la cosmologie observationnelle.",
+               "L'édition 2027 portait sur les ondes gravitationnelles."],
+         deadline=dict(day=20, month=7, year=2029, phrase="avant le "),
+         opening=dict(day=20, month=1, year=2029, variant=2),
+         amount=dict(value=340000, variant=3)),
+    dict(id="anr-robot-distrac-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/robot-distrac-2029.html",
+         title="Robotique cobotique 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Les capteurs embarqués et l'IA embarquée structurent ce programme.", "",
+               "Des fonds de recherche antérieurs (2025) plafonnaient à 200 000 €."],
+         deadline=dict(day=9, month=4, year=2029, variant=1),
+         opening=dict(day=9, month=12, year=2028),
+         amount=dict(value=430000, variant=0),
+         distract=("Le précédent programme octroyait 200 000 €.", "AMOUNT")),
+    dict(id="anr-edu-distrac-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/edu-distrac-2029.html",
+         title="Éducation numérique 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Appel sur le numérique éducatif et l'évaluation des apprentissages.", "",
+               "Une précédente soumission avait une date 30/09/2028."],
+         deadline=dict(day=30, month=9, year=2029),
+         opening=dict(day=30, month=3, year=2029),
+         amount=dict(value=190000, variant=3),
+         distract=("L'ancien cycle clôturait le 30/09/2028.", "DEADLINE")),
+    # INCa: missing fields + org variant + realistic
+    dict(id="inca-certif-2029", split="test",
+         url="https://www.e-cancer.fr/appels-a-projets/certif-2029",
+         title="Certification des centres 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Financement de démarches qualité et certification des centres de lutte contre le cancer."],
+         opening=dict(day=1, month=3, year=2029),
+         amount=dict(value=90000, variant=0)),
+    dict(id="inca-real-2029", split="train",
+         url="https://www.e-cancer.fr/appels-a-projets/inca-real-2029",
+         title="Épidémiologie des cancers 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Programme d'épidémiologie descriptive et analytique des cancers en population.", "",
+               "Objectif : documenter les trajectoires de soins et les inégalités territoriales.",
+               "Les candidatures sont ouvertes aux équipes académiques et hospitalières."],
+         deadline=dict(day=17, month=10, year=2029, variant=1),
+         opening=dict(day=17, month=4, year=2029, variant=2),
+         amount=dict(value=520000, variant=4, min=150000),
+         realistic=True),
+    # More ARS regions
+    dict(id="ars-bretagne-2029", split="test",
+         url="https://www.bretagne.ars.sante.fr/ars-bretagne-2029",
+         title="Développement des usages numériques 2029", org="ARS Bretagne",
+         org_full="Agence régionale de santé Bretagne",
+         body=["Appel régional sur les usages numériques en santé et la télémédecine."],
+         deadline=dict(day=23, month=6, year=2029, variant=1),
+         opening=dict(day=23, month=2, year=2029),
+         amount=dict(value=140000, variant=0),
+         expected_extra=dict(geographical_scope="Bretagne")),
+    dict(id="ars-hdf-2029", split="train",
+         url="https://www.hauts-de-france.ars.sante.fr/ars-hdf-2029",
+         title="Parcours précarité 2029", org="ARS Hauts-de-France",
+         org_full="Agence régionale de santé Hauts-de-France",
+         body=["Renforcement des parcours de soins pour les publics précaires."],
+         deadline=dict(day=4, month=8, year=2029, phrase="au plus tard le "),
+         opening=dict(day=4, month=3, year=2029, variant=1),
+         amount=dict(value=165000, variant=2),
+         expected_extra=dict(geographical_scope="Hauts-de-France")),
+    dict(id="ars-normandie-2029", split="test",
+         url="https://www.normandie.ars.sante.fr/ars-normandie-2029",
+         title="Vieillissement actif 2029", org="ARS Normandie",
+         org_full="Agence régionale de santé Normandie",
+         body=["Appel pour le soutien à domicile et le vieillissement actif en santé."],
+         deadline=dict(day=12, month=9, year=2029, variant=1),
+         opening=dict(day=12, month=4, year=2029),
+         amount=dict(value=125000, variant=3),
+         expected_extra=dict(geographical_scope="Normandie")),
+    # Ligue / FRM / Fondation ARC: more examples incl. missing fields
+    dict(id="ligue-cancer-espace-2029", split="test",
+         url="https://www.ligue-cancer.net/appels-a-projets/espace-2029",
+         title="Environnement et cancer 2029", org="Ligue contre le Cancer",
+         org_full="Ligue contre le cancer",
+         body=["Recherche sur les expositions environnementales et le risque de cancer."],
+         deadline=dict(day=19, month=5, year=2029, phrase="avant le "),
+         opening=dict(day=2, month=1, year=2029),
+         amount=dict(value=290000, variant=0)),
+    dict(id="frm-sommeil-2029", split="train",
+         url="https://www.frm.org/appels-a-projets/sommeil-2029",
+         title="Neurobiologie du sommeil 2029", org="FRM", org_full="Fondation pour la Recherche Médicale",
+         body=["Programme consacré aux mécanismes moléculaires du sommeil et de l'éveil."],
+         deadline=dict(day=25, month=10, year=2029, variant=1),
+         opening=dict(day=25, month=4, year=2029),
+         amount=dict(value=240000, variant=0)),
+    dict(id="fondation-arc-jeune-2029", split="test",
+         url="https://www.fondation-arc.org/appels-a-projets/jeune-2029",
+         title="Bourses jeunes chercheurs 2029", org="Fondation ARC",
+         org_full="Fondation ARC pour la recherche sur le cancer",
+         body=["Bourses destinées aux jeunes chercheurs en oncologie fondamentale."],
+         deadline=dict(day=29, month=6, year=2029, variant=1),
+         opening=dict(day=29, month=1, year=2029),
+         amount=dict(value=105000, variant=0),
+         expected_extra=dict(funding_type="bourse")),
+    dict(id="fondation-france-numerique-2029", split="train",
+         url="https://www.fondationdefrance.org/appels-a-projets/numerique-2029",
+         title="Éducation numérique 2029", org="Fondation de France",
+         org_full="Fondation de France",
+         body=["Appel sociétal pour réduire la fracture numérique à l'école."],
+         opening=dict(day=1, month=4, year=2029),
+         amount=dict(value=60000, variant=0)),
+    # Horizon Europe: more topics, English-ish labels, ranges
+    dict(id="horizon-europe-agri-2029", split="test",
+         url="https://ec.europa.eu/horizon-europe/agri-2029",
+         title="Agriculture résiliente 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Appel portant sur les systèmes agricoles durables et la réduction des intrants."],
+         deadline=dict(day=18, month=2, year=2029, variant=1),
+         opening=dict(day=2, month=9, year=2028),
+         amount=dict(value=4200000, variant=4, min=1200000),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="horizon-europe-sante-2029", split="train",
+         url="https://ec.europa.eu/horizon-europe/sante-2029",
+         title="Résilience sanitaire 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Coordination de la recherche européenne sur la résilience des systèmes de santé."],
+         deadline=dict(day=16, month=9, year=2029, phrase="au plus tard le "),
+         opening=dict(day=15, month=3, year=2029),
+         amount=dict(value=3300000, variant=4),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="horizon-europe-donnees-2029", split="test",
+         url="https://ec.europa.eu/horizon-europe/donnees-2029",
+         title="Espace européen des données 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Appel pour les infrastructures de partage de données de santé à l'échelle européenne."],
+         deadline=dict(day=7, month=4, year=2029, variant=1),
+         opening=dict(day=7, month=11, year=2028),
+         amount=dict(value=5200000, variant=4, min=1800000),
+         expected_extra=dict(geographical_scope="Europe")),
+    # Inserm / CNRS: realistic docs + org variants + missing fields
+    dict(id="inserm-cancer-real-2029", split="test",
+         url="https://www.inserm.fr/appels-a-projets/cancer-real-2029",
+         title="Immunité anticancéreuse 2029", org="Inserm",
+         org_full="Institut national de la santé et de la recherche médicale",
+         body=["Financement de projets sur la biologie des tumeurs et la réponse immunitaire.", "",
+               "Les équipements de pointe (cytométrie, imagerie) sont valorisables dans le budget.",
+               "Co-financement possible avec les alliances thématiques en cancérologie."],
+         deadline=dict(day=11, month=6, year=2029, variant=1),
+         opening=dict(day=11, month=1, year=2029, variant=2),
+         amount=dict(value=600000, variant=0, min=200000),
+         realistic=True),
+    dict(id="cnrs-musique-2029", split="train",
+         url="https://www.cnrs.fr/appels-a-projets/musique-2029",
+         title="Acoustique musicale 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["Recherche sur l'acoustique des instruments et la psychoacoustique."],
+         deadline=dict(day=2, month=8, year=2029, phrase="avant le "),
+         opening=dict(day=2, month=3, year=2029),
+         amount=dict(value=120000, variant=3),
+         expected_extra=dict(geographical_scope="France")),
+    dict(id="inserm-metabolisme-2029", split="test",
+         url="https://www.inserm.fr/appels-a-projets/metabolisme-2029",
+         title="Obésité et métabolisme 2029", org="Inserm", org_full="Institut national de la santé et de la recherche médicale",
+         body=["Programme sur les déterminants métaboliques de l'obésité et ses complications."],
+         deadline=dict(day=8, month=10, year=2029, variant=1),
+         opening=dict(day=8, month=5, year=2029),
+         amount=dict(value=270000, variant=0)),
+    dict(id="cnrs-soleil-distrac-2029", split="test",
+         url="https://www.cnrs.fr/appels-a-projets/soleil-distrac-2029",
+         title="Énergie solaire 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["Ce programme cible les cellules photovoltaïques de nouvelle génération.", "",
+               "Un appel voisin (2026) finançait à hauteur de 150 000 €."],
+         deadline=dict(day=14, month=4, year=2029, variant=1),
+         opening=dict(day=14, month=11, year=2028),
+         amount=dict(value=350000, variant=2),
+         distract=("L'appel parallèle octroyait 150 000 €.", "AMOUNT")),
+    # Organisation-name variants (abbreviation appears first, full name in body)
+    dict(id="inca-organisation-2029", split="test",
+         url="https://www.e-cancer.fr/appels-a-projets/organisation-2029",
+         title="Soins de support 2029", org="INCa", org_full="Institut national du cancer",
+         body=["L'Institut national du cancer soutient ici l'innovation en soins de support.",
+               "Les structures hospitalières peuvent candidater en groupement."],
+         deadline=dict(day=21, month=2, year=2029, variant=1),
+         opening=dict(day=21, month=9, year=2028),
+         amount=dict(value=330000, variant=0)),
+    dict(id="anr-organisation-long-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/organisation-long-2029.html",
+         title="Infrastructures de recherche 2029", org="ANR",
+         org_full="Agence nationale de la recherche",
+         body=["L'Agence nationale de la recherche, aux côtés des organismes, finance le déploiement "
+               "d'infrastructures de recherche ouvertes à la communauté scientifique.",
+               "Les projets sont évalués par un comité scientifique international.",
+               "Un volet spécifique est dédié aux très grands équipements de calcul."],
+         deadline=dict(day=27, month=11, year=2029, variant=1),
+         opening=dict(day=27, month=5, year=2029, variant=2),
+         amount=dict(value=880000, variant=4, min=250000),
+         realistic=True),
+])
+
+
+# -- Batch 3: final group to reach ~200, edge cases and more sources --
+_PROG_EXAMPLES += _ex([
+    # Double-missing-field edge cases
+    dict(id="anr-consultation-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/consultation-2029.html",
+         title="Consultation nationale 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Appel en préparation : le cahier des charges sera publié ultérieurement."],
+         opening=dict(day=1, month=2, year=2029, variant=1)),
+    dict(id="inca-dotation-2029", split="train",
+         url="https://www.e-cancer.fr/appels-a-projets/dotation-2029",
+         title="Dotation aux plateformes 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Dotation de fonctionnement annuelle pour les centres hospitaliers labellisés."],
+         deadline=dict(day=31, month=12, year=2029, variant=1)),
+    dict(id="frm-appel-ouvert-2029", split="test",
+         url="https://www.frm.org/appels-a-projets/appel-ouvert-2029",
+         title="Aides courtes 2029", org="FRM", org_full="Fondation pour la Recherche Médicale",
+         body=["Guichet ouvert tout au long de l'année pour des aides ponctuelles."],
+         amount=dict(value=25000, variant=0)),
+    # More sources with realistic docs
+    dict(id="chu-grenoble-2029", split="test",
+         url="https://www.chu-grenoble.fr/appels-a-projets/grenoble-2029",
+         title="Innovation biomédicale 2029", org="CHU Grenoble Alpes",
+         org_full="Centre hospitalier universitaire Grenoble Alpes",
+         body=["Appel interne pour les projets de recherche translationnelle et d'innovation biomédicale.",
+               "Partenariats avec les laboratoires de la région attendus."],
+         deadline=dict(day=13, month=5, year=2029, variant=1),
+         opening=dict(day=13, month=1, year=2029),
+         amount=dict(value=180000, variant=0),
+         realistic=True),
+    dict(id="chu-lyon-2029", split="train",
+         url="https://www.chu-lyon.fr/appels-a-projets/lyon-2029",
+         title="Thérapies cellulaires 2029", org="CHU de Lyon", org_full="Centre hospitalier universitaire de Lyon",
+         body=["Financement de l'ingénierie cellulaire et des thérapies cellulaires avancées."],
+         deadline=dict(day=3, month=6, year=2029, phrase="avant le "),
+         opening=dict(day=3, month=1, year=2029),
+         amount=dict(value=220000, variant=2)),
+    dict(id="ap-hp-2029", split="test",
+         url="https://www.aphp.fr/appels-a-projets/aphp-2029",
+         title="Recherche de soin courants 2029", org="AP-HP", org_full="Assistance publique - Hôpitaux de Paris",
+         body=["Appel à projets pour la recherche menée en contexte de soins courants."],
+         deadline=dict(day=10, month=9, year=2029, variant=1),
+         opening=dict(day=10, month=3, year=2029),
+         amount=dict(value=300000, variant=3)),
+    # Long realistic docs across organisations
+    dict(id="horizon-europe-real-2029", split="train",
+         url="https://ec.europa.eu/horizon-europe/real-2029",
+         title="Technologies quantiques 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["L'appel soutient la mise en place d'infrastructures quantiques européennes.", "",
+               "Les consortiums doivent mobiliser au minimum trois pays membres.",
+               "Un budget de coordination est prévu pour les actions de dissémination.",
+               "Thématiques : calcul quantique, simulation, métrologie et communication."],
+         deadline=dict(day=8, month=4, year=2029, variant=1),
+         opening=dict(day=8, month=10, year=2028, variant=2),
+         amount=dict(value=9700000, variant=4, min=3000000),
+         expected_extra=dict(geographical_scope="Europe"),
+         realistic=True),
+    dict(id="ars-idf-real-2029", split="test",
+         url="https://www.iledefrance.ars.sante.fr/ars-idf-real-2029",
+         title="Lit et territorialité 2029", org="ARS Île-de-France",
+         org_full="Agence régionale de santé Île-de-France",
+         body=["Cet appel accompagne la recomposition de l'offre de soins de ville et d'hospitalisation.", "",
+               "Le volet coordination finance les dispositifs de soins partagés.",
+               "Le volet innovation soutient l'expérimentation de nouveaux parcours."],
+         deadline=dict(day=15, month=6, year=2029, variant=1),
+         opening=dict(day=15, month=12, year=2028),
+         amount=dict(value=240000, variant=0, min=60000),
+         expected_extra=dict(geographical_scope="Île-de-France"),
+         realistic=True),
+    # More distractors & format edge cases
+    dict(id="anr-tcamera-distrac-2029", split="test",
+         url="https://anr.fr/fr/les-appels-a-projets/camera-distrac-2029.html",
+         title="Imagerie 3D 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Le financement plafonne à 400 000 € cette année ; l'année prochaine il changera.",
+               "Les grilles indiquent 400 000 € comme montant maximal.", ""],
+         deadline=dict(day=14, month=10, year=2029, variant=1),
+         opening=dict(day=14, month=4, year=2029),
+         amount=dict(value=400000, variant=0)),
+    dict(id="inserm-deadline-num-2029", split="test",
+         url="https://www.inserm.fr/appels-a-projets/deadline-num-2029",
+         title="Imagerie cérébrale 2029", org="Inserm", org_full="Institut national de la santé et de la recherche médicale",
+         body=["Les inscriptions sont ouvertes jusqu'à la date mentionnée ci-dessous."],
+         deadline=dict(day=2, month=12, year=2029, phrase="au plus tard le ", variant=1),
+         opening=dict(day=2, month=6, year=2029, variant=2),
+         amount=dict(value=410000, variant=2)),
+    dict(id="fondation-france-senior-2029", split="train",
+         url="https://www.fondationdefrance.org/appels-a-projets/senior-2029",
+         title="Bien vieillir 2029", org="Fondation de France",
+         org_full="Fondation de France",
+         body=["Appel sociétal sur la perte d'autonomie et le soutien aux aidants."],
+         deadline=dict(day=20, month=4, year=2029, phrase="avant le "),
+         opening=dict(day=20, month=11, year=2028),
+         amount=dict(value=50000, variant=0)),
+    dict(id="ligue-cancer-bourses-2029", split="test",
+         url="https://www.ligue-cancer.net/appels-a-projets/bourses-2029",
+         title="Bourses de thèse 2029", org="Ligue contre le Cancer",
+         org_full="Ligue contre le cancer",
+         body=["Bourses doctorales en recherche fondamentale contre le cancer."],
+         deadline=dict(day=12, month=5, year=2029, variant=1),
+         opening=dict(day=12, month=12, year=2028),
+         amount=dict(value=75000, variant=0),
+         expected_extra=dict(funding_type="bourse")),
+    # frm realistic
+    dict(id="frm-real-2029", split="train",
+         url="https://www.frm.org/appels-a-projets/frm-real-2029",
+         title="Microbiote et santé 2029", org="FRM", org_full="Fondation pour la Recherche Médicale",
+         body=["Programme international sur le rôle du microbiote dans les maladies chroniques.", "",
+               "Les projets doivent combiner approches métagénomiques et validations fonctionnelles.",
+               "La collaboration avec les études de cohortes est encouragée."],
+         deadline=dict(day=25, month=9, year=2029, variant=1),
+         opening=dict(day=25, month=3, year=2029, variant=2),
+         amount=dict(value=480000, variant=0, min=120000),
+         realistic=True),
+    # Additional ARS + INCa
+    dict(id="ars-occitanie-real-2029", split="test",
+         url="https://www.occitanie.ars.sante.fr/ars-occitanie-real-2029",
+         title="Offre de soins 2029", org="ARS Occitanie",
+         org_full="Agence régionale de santé Occitanie",
+         body=["Plan régional de soutien à l'offre de soins de proximité.", "",
+               "Sont concernés les maisons de santé pluriprofessionnelles et les centres de santé."],
+         deadline=dict(day=7, month=8, year=2029, variant=1),
+         opening=dict(day=7, month=3, year=2029),
+         amount=dict(value=200000, variant=0),
+         expected_extra=dict(geographical_scope="Occitanie"),
+         realistic=True),
+    dict(id="inca-ouverture-rien-2029", split="test",
+         url="https://www.e-cancer.fr/appels-a-projets/ouverture-rien-2029",
+         title="Plateformes de transfert 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Soutien au fonctionnement des plateformes de transfert en oncologie."],
+         deadline=dict(day=15, month=7, year=2029, variant=2)),
+    dict(id="anr-script-distrac-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/script-distrac-2029.html",
+         title="Modélisation de l'épidémie 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Les simulations s'appuient sur un jeu de données historiques (2019-2023).",
+               "Le montant de la dotation reste celui annoncé ci-dessous."],
+         deadline=dict(day=28, month=4, year=2029, variant=1),
+         opening=dict(day=28, month=10, year=2028),
+         amount=dict(value=260000, variant=3),
+         distract=("Les archives indiquent 90 000 € en 2019.", "AMOUNT")),
+])
+
+
+# -- Batch 4: final push to ~200 --
+_PROG_EXAMPLES += _ex([
+    dict(id="inserm-immuno-real-2029", split="test",
+         url="https://www.inserm.fr/appels-a-projets/immuno-real-2029",
+         title="Immuno-oncologie 2029", org="Inserm",
+         org_full="Institut national de la santé et de la recherche médicale",
+         body=["Recherche translationnelle sur les mécanismes d'évasion immunitaire des tumeurs.", "",
+               "Partenariats public-privé encouragés avec le secteur pharmaceutique."],
+         deadline=dict(day=9, month=3, year=2029, variant=1),
+         opening=dict(day=9, month=9, year=2028, variant=2),
+         amount=dict(value=530000, variant=2, min=160000),
+         realistic=True),
+    dict(id="cnrs-physique-2029", split="train",
+         url="https://www.cnrs.fr/appels-a-projets/physique-2029",
+         title="Physique du rayonnement 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["Programme dédié à la physique du rayonnement et aux sources de lumière synchrotron."],
+         deadline=dict(day=6, month=11, year=2029, phrase="au plus tard le "),
+         opening=dict(day=6, month=5, year=2029),
+         amount=dict(value=195000, variant=3)),
+    dict(id="horizon-europe-biodiv-2029", split="test",
+         url="https://ec.europa.eu/horizon-europe/biodiv-2029",
+         title="Services écosystémiques 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Valorisation des services écosystémiques et liens avec les politiques publiques."],
+         deadline=dict(day=13, month=8, year=2029, variant=1),
+         opening=dict(day=13, month=2, year=2029),
+         amount=dict(value=3700000, variant=4),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="ars-ara-real-2029", split="train",
+         url="https://www.auvergne-rhone-alpes.ars.sante.fr/ars-ara-real-2029",
+         title="Santé environnementale 2029", org="ARS Auvergne-Rhône-Alpes",
+         org_full="Agence régionale de santé Auvergne-Rhône-Alpes",
+         body=["Appel sur les effets environnementaux sur la santé en territoires ruraux.", "",
+               "Projet pilote en lien avec les collectivités locales."],
+         deadline=dict(day=19, month=1, year=2029, variant=1),
+         opening=dict(day=19, month=7, year=2028),
+         amount=dict(value=135000, variant=0),
+         expected_extra=dict(geographical_scope="Auvergne-Rhône-Alpes"),
+         realistic=True),
+    dict(id="ligue-cancer-epigen-2029", split="test",
+         url="https://www.ligue-cancer.net/appels-a-projets/epigen-2029",
+         title="Épigénétique et vieillissement 2029", org="Ligue contre le Cancer",
+         org_full="Ligue contre le cancer",
+         body=["Recherche sur les altérations épigénétiques dans le vieillissement et le cancer."],
+         deadline=dict(day=22, month=11, year=2029, variant=1),
+         opening=dict(day=22, month=5, year=2029),
+         amount=dict(value=280000, variant=0)),
+    dict(id="frm-translational-2029", split="train",
+         url="https://www.frm.org/appels-a-projets/translational-2029",
+         title="Recherche translationnelle 2029", org="FRM", org_full="Fondation pour la Recherche Médicale",
+         body=["Passer du laboratoire au lit du patient : le programme vise à accélérer la translation."],
+         deadline=dict(day=3, month=7, year=2029, variant=1),
+         opening=dict(day=3, month=1, year=2029),
+         amount=dict(value=390000, variant=2)),
+    dict(id="ars-paca-real-2029", split="test",
+         url="https://www.paca.ars.sante.fr/ars-paca-real-2029",
+         title="Addictions et prévention 2029", org="ARS Provence-Alpes-Côte d'Azur",
+         org_full="Agence régionale de santé Provence-Alpes-Côte d'Azur",
+         body=["Soutien aux dispositifs d'information et de prévention des addictions."],
+         deadline=dict(day=18, month=3, year=2029, variant=1),
+         opening=dict(day=18, month=10, year=2028),
+         amount=dict(value=110000, variant=0),
+         expected_extra=dict(geographical_scope="Provence-Alpes-Côte d'Azur")),
+    dict(id="inca-reinsertion-2029", split="train",
+         url="https://www.e-cancer.fr/appels-a-projets/reinsertion-2029",
+         title="Retour à l'emploi 2029", org="INCa", org_full="Institut national du cancer",
+         body=["Soutien aux dispositifs de réinsertion des anciens patients."],
+         deadline=dict(day=11, month=2, year=2029, variant=1),
+         opening=dict(day=11, month=8, year=2028),
+         amount=dict(value=150000, variant=3)),
+    dict(id="horizon-europe-ia-2029", split="test",
+         url="https://ec.europa.eu/horizon-europe/ia-2029",
+         title="IA de confiance 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Appel pour le développement d'IA transparente et respectueuse des droits fondamentaux."],
+         deadline=dict(day=20, month=6, year=2029, phrase="au plus tard le "),
+         opening=dict(day=20, month=1, year=2029),
+         amount=dict(value=5400000, variant=4),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="fondation-arc-senior-2029", split="train",
+         url="https://www.fondation-arc.org/appels-a-projets/senior-2029",
+         title="Cancers du sujet âgé 2029", org="Fondation ARC",
+         org_full="Fondation ARC pour la recherche sur le cancer",
+         body=["Soutien à la recherche sur la prise en charge des cancers chez les patients âgés."],
+         deadline=dict(day=16, month=4, year=2029, variant=1),
+         opening=dict(day=16, month=11, year=2028),
+         amount=dict(value=340000, variant=0)),
+    dict(id="ars-idf-pharma-2029", split="test",
+         url="https://www.iledefrance.ars.sante.fr/ars-idf-pharma-2029",
+         title="Mutualisation logistique 2029", org="ARS Île-de-France",
+         org_full="Agence régionale de santé Île-de-France",
+         body=["Soutien à la mutualisation de la logistique pharmaceutique hospitalière."],
+         deadline=dict(day=5, month=5, year=2029, variant=1),
+         opening=dict(day=5, month=1, year=2029),
+         amount=dict(value=190000, variant=0),
+         expected_extra=dict(geographical_scope="Île-de-France")),
+    dict(id="anr-neuro-2029", split="train",
+         url="https://anr.fr/fr/les-appels-a-projets/neuro-2029.html",
+         title="Neurosciences computationnelles 2029", org="ANR", org_full="Agence nationale de la recherche",
+         body=["Recherche sur les modèles computationnels du cerveau et l'intelligence artificielle bio-inspirée."],
+         deadline=dict(day=22, month=6, year=2029, variant=1),
+         opening=dict(day=22, month=1, year=2029),
+         amount=dict(value=410000, variant=2)),
+    dict(id="inserm-urgences-2029", split="test",
+         url="https://www.inserm.fr/appels-a-projets/urgences-2029",
+         title="Gestion des urgences 2029", org="Inserm", org_full="Institut national de la santé et de la recherche médicale",
+         body=["Programme sur l'optimisation des parcours d'urgence et la médecine de précision."],
+         deadline=dict(day=7, month=9, year=2029, variant=1),
+         opening=dict(day=7, month=3, year=2029),
+         amount=dict(value=370000, variant=0)),
+    dict(id="ligue-cancer-innovation-2029", split="train",
+         url="https://www.ligue-cancer.net/appels-a-projets/innovation-2029",
+         title="Innovation en cancérologie 2029", org="Ligue contre le Cancer",
+         org_full="Ligue contre le cancer",
+         body=["Soutien à l'innovation dans le diagnostic et la prise en charge des cancers."],
+         deadline=dict(day=1, month=8, year=2029, variant=1),
+         opening=dict(day=1, month=2, year=2029),
+         amount=dict(value=230000, variant=2)),
+    dict(id="cnrs-chimie-2029", split="test",
+         url="https://www.cnrs.fr/appels-a-projets/chimie-2029",
+         title="Chimie verte 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["Appel sur la chimie durable et les procédés biosourcés."],
+         deadline=dict(day=29, month=4, year=2029, phrase="avant le "),
+         opening=dict(day=29, month=11, year=2028),
+         amount=dict(value=210000, variant=3)),
+    dict(id="horizon-europe-inclusion-2029", split="train",
+         url="https://ec.europa.eu/horizon-europe/inclusion-2029",
+         title="Inclusion sociale 2029", org="Commission européenne",
+         org_full="Commission européenne",
+         body=["Recherche sur les facteurs d'inclusion sociale et les politiques publiques."],
+         deadline=dict(day=11, month=7, year=2029, variant=1),
+         opening=dict(day=11, month=1, year=2029),
+         amount=dict(value=2700000, variant=4),
+         expected_extra=dict(geographical_scope="Europe")),
+    dict(id="fondation-france-handicap-real-2029", split="test",
+         url="https://www.fondationdefrance.org/appels-a-projets/handicap-real-2029",
+         title="Assistants numériques 2029", org="Fondation de France",
+         org_full="Fondation de France",
+         body=["Appel pour l'innovation sociale en faveur de l'autonomie des personnes handicapées.", "",
+               "Les dispositifs doivent s'inscrire dans une démarche d'inclusion durable."],
+         deadline=dict(day=30, month=9, year=2029, variant=1),
+         opening=dict(day=1, month=6, year=2029),
+         amount=dict(value=70000, variant=0),
+         realistic=True),
+    dict(id="ars-guadeloupe-real-2029", split="train",
+         url="https://www.guadeloupe.ars.sante.fr/ars-guadeloupe-real-2029",
+         title="Diabète et maladies chroniques 2029", org="ARS Guadeloupe",
+         org_full="Agence régionale de santé Guadeloupe",
+         body=["Soutien aux structures de soins de proximité pour la prise en charge du diabète.", "",
+               "Priorité aux projets en médecine de groupe et en téléconsultation."],
+         deadline=dict(day=22, month=1, year=2029, variant=1),
+         opening=dict(day=22, month=7, year=2028),
+         amount=dict(value=85000, variant=0),
+         expected_extra=dict(geographical_scope="Guadeloupe"),
+         realistic=True),
+    dict(id="fondation-arc-distrac-2029", split="test",
+         url="https://www.fondation-arc.org/appels-a-projets/distrac-2029.html",
+         title="Prévention et recherche 2029", org="Fondation ARC", org_full="Fondation ARC pour la recherche sur le cancer",
+         body=["Un programme d'accompagnement des patients pendant et après le traitement.",
+               "L'ancien financement était de 400 000 €."],
+         deadline=dict(day=10, month=11, year=2029, variant=1),
+         opening=dict(day=10, month=5, year=2029),
+         amount=dict(value=195000, variant=0),
+         distract=("L'ancien montant était 400 000 €.", "AMOUNT")),
+    dict(id="chu-paris-2029", split="train",
+         url="https://www.aphp.fr/appels-a-projets/chu-paris-2029",
+         title="Santé mentale d'urgence 2029", org="AP-HP", org_full="Assistance publique - Hôpitaux de Paris",
+         body=["Recherche sur la gestion d'urgence des troubles psychiatriques aigus."],
+         deadline=dict(day=15, month=10, year=2029, variant=1),
+         opening=dict(day=15, month=4, year=2029),
+         amount=dict(value=160000, variant=3)),
+])
+
+
+# -- Batch 5: final 2 to reach exactly 200 --
+_PROG_EXAMPLES += _ex([
+    dict(id="inserm-neuroreal-2029", split="train",
+         url="https://www.inserm.fr/appels-a-projets/neuroreal-2029",
+         title="Modélisation neuronale 2029", org="Inserm",
+         org_full="Institut national de la santé et de la recherche médicale",
+         body=["Programme interdisciplinaire combinant imagerie, neurosciences computationnelles et IA."],
+         deadline=dict(day=11, month=11, year=2029, phrase="au plus tard le "),
+         opening=dict(day=11, month=5, year=2029),
+         amount=dict(value=490000, variant=2, min=150000)),
+    dict(id="cnrs-real-2029", split="test",
+         url="https://www.cnrs.fr/appels-a-projets/cnrs-real-2029",
+         title="Matériaux durables 2029", org="CNRS", org_full="Centre national de la recherche scientifique",
+         body=["Appel sur la conception de matériaux biosourcés et leurs applications industrielles.", "",
+               "Le partenariat avec des laboratoires internationaux est valorisé."],
+         deadline=dict(day=19, month=12, year=2029, variant=1),
+         opening=dict(day=19, month=6, year=2029),
+         amount=dict(value=270000, variant=0),
+         realistic=True),
+])
+
+
+
+EXAMPLES.extend(_PROG_EXAMPLES)
+
 
 
 def main() -> None:
