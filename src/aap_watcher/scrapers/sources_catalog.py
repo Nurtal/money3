@@ -144,3 +144,33 @@ class ThesaurusScraper(GenericSourceScraper):
     source_name = "thesaurus"
     listing_url = "https://www.girci-est.fr/thesaurus/"
     entry_block = _TR_BLOCK
+
+
+class PasteurScraper(GenericSourceScraper):
+    source_name = "pasteur"
+    listing_url = "https://research.pasteur.fr/fr/appels-a-projets/"
+    entry_block = _H3_BLOCK
+
+
+class AdemeScraper(GenericSourceScraper):
+    source_name = "ademe"
+    listing_url = "https://agirpourlatransition.ademe.fr/entreprises/aides-financieres/appels-projets"
+    entry_block = _APPEL_PROJET_CARD
+
+
+class AFMTéléthonScraper(GenericSourceScraper):
+    source_name = "afm"
+    listing_url = "https://www.afm-telethon.fr/recherche/appels-projets"
+    entry_block = _H2_BLOCK
+
+
+class ANSMScraper(GenericSourceScraper):
+    source_name = "ansm"
+    listing_url = "https://ansm.sante.fr/appels-a-projets"
+    entry_block = _H3_BLOCK
+
+
+class AlzheimerScraper(GenericSourceScraper):
+    source_name = "alzheimer"
+    listing_url = "https://www.fondation-alzheimer.org/appels-a-projets/"
+    entry_block = _H2_BLOCK

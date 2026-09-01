@@ -20,6 +20,7 @@ from urllib.request import urlopen
 import httpx
 
 from ..extraction.base import Document
+from .pdf_parser import has_pdf_extension, is_pdf_bytes
 
 _USER_AGENT = "AAPWatcher/0.1 (+https://example.org/aap-watcher; polite crawler)"
 _TAG_RE = re.compile(r"<[^>]+>")
@@ -77,7 +78,12 @@ class BaseScraper(ABC):
     # --- public API -------------------------------------------------------
 
     def fetch(self, url: str, html: Optional[str] = None) -> str:
-        """Return HTML for ``url``, using ``html`` directly if provided (offline)."""
+        """Return HTML for ``url``, using ``html`` directly if provided (offline).
+
+        When ``url`` points to a PDF, the returned string is the PDF's extracted
+        text (requires the ``pdf`` extra). PDFs fetched via ``html`` are not
+        parsed — offline tests pass text already.
+        """
         if html is not None:
             return html
         if not self._robots_allows(url):
@@ -85,6 +91,10 @@ class BaseScraper(ABC):
         self._rate_limit()
         resp = self._client.get(url)
         resp.raise_for_status()
+        if has_pdf_extension(url) or is_pdf_bytes(resp.content):
+            from .pdf_parser import extract_pdf_text
+
+            return extract_pdf_text(resp.content)
         return resp.text
 
     @abstractmethod

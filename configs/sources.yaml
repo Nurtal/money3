@@ -1,0 +1,140 @@
+# Source adapter configurations.
+#
+# Mirrors the adapters registered in src/aap_watcher/scrapers/sources.py and
+# sources_catalog.py. `enabled` controls whether a source is scraped by default
+# (run/monitor "all"); `requests_per_second` is the per-source polite rate limit
+# (default 0.5 from BaseScraper); `respect_robots_txt` gates robots.txt checks.
+#
+# Add a new source here AND register it in sources.py with a fixture + test.
+
+sources:
+  - name: anr
+    key: anr
+    listing_url: "https://anr.fr/fr/appels-a-projets/"
+    enabled: true
+
+  - name: inca
+    key: inca
+    listing_url: "https://www.cancer.fr/professionnels-de-la-recherche/appels-a-projets-et-a-candidatures/nos-appels-a-projets"
+    enabled: true
+
+  - name: ars
+    key: ars
+    listing_url: "https://www.ars.sante.fr/liste-appels-projet-candidature-nationale"
+    enabled: true
+
+  - name: fondation_arc
+    key: fondation_arc
+    listing_url: "https://www.fondation-arc.org/appels-a-projets/"
+    enabled: true
+
+  - name: frm
+    key: frm
+    listing_url: "https://www.frm.org/fr/programmes"
+    enabled: true
+
+  - name: ligue_cancer
+    key: ligue_cancer
+    listing_url: "https://www.ligue-cancer.net/espace-chercheur"
+    enabled: true
+
+  - name: fondation_france
+    key: fondation_france
+    listing_url: "https://www.fondationdefrance.org/fr/appels-a-projets"
+    enabled: true
+
+  - name: inserm
+    key: inserm
+    listing_url: "https://pro.inserm.fr/appels-a-projets"
+    enabled: true
+
+  - name: cnrs
+    key: cnrs
+    listing_url: "https://miti.cnrs.fr/appels-a-projets/"
+    enabled: true
+
+  - name: inria
+    key: inria
+    listing_url: "https://www.inria.fr/fr/appels-a-propositions-et-a-candidatures"
+    enabled: true
+
+  - name: inrae
+    key: inrae
+    listing_url: "https://explorae.inrae.fr/fr"
+    enabled: true
+
+  - name: bettencourt
+    key: bettencourt
+    listing_url: "https://www.fondationbs.org/candidater-un-prix"
+    enabled: true
+
+  - name: thesaurus
+    key: thesaurus
+    listing_url: "https://www.girci-est.fr/thesaurus/"
+    enabled: true
+
+  - name: bpi
+    key: bpi
+    listing_url: "https://www.bpifrance.fr/nos-appels-a-projets-concours"
+    enabled: true
+
+  - name: appel_projet_recherche
+    key: appel_projet_recherche
+    listing_url: "https://www.appelsprojetsrecherche.fr/appels/1/6/W10="
+    enabled: true
+
+  - name: tete_cou
+    key: tete_cou
+    listing_url: "https://www.tete-cou.fr/recherche/appels-a-projets-recherche"
+    enabled: true
+
+  - name: research_connect
+    key: research_connect
+    listing_url: "https://www.myresearchconnect.com/news/"
+    enabled: true
+
+  - name: bzh
+    key: bzh
+    listing_url: "https://www.bretagne.bzh/aides/"
+    enabled: true
+
+  - name: girci_go
+    key: girci_go
+    listing_url: "https://www.girci-go.org"
+    enabled: true
+
+  - name: europe
+    key: europe
+    listing_url: "https://www.horizon-europe.gouv.fr/"
+    enabled: true
+
+  - name: pasteur
+    key: pasteur
+    listing_url: "https://research.pasteur.fr/fr/appels-a-projets/"
+    enabled: true
+
+  - name: ademe
+    key: ademe
+    listing_url: "https://agirpourlatransition.ademe.fr/entreprises/aides-financieres/appels-projets"
+    enabled: true
+
+  - name: afm
+    key: afm
+    listing_url: "https://www.afm-telethon.fr/recherche/appels-projets"
+    enabled: true
+
+  - name: ansm
+    key: ansm
+    listing_url: "https://ansm.sante.fr/appels-a-projets"
+    enabled: true
+
+  - name: alzheimer
+    key: alzheimer
+    listing_url: "https://www.fondation-alzheimer.org/appels-a-projets/"
+    enabled: true
+
+defaults:
+  requests_per_second: 0.5
+  respect_robots_txt: true
+  timeout: 30
+  cache_dir: "data/raw"

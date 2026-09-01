@@ -4874,8 +4874,328 @@ _PROG_EXAMPLES += _ex([
 EXAMPLES.extend(_PROG_EXAMPLES)
 
 
+# ---------------------------------------------------------------------------
+# Scalable, data-driven generation (Phase 4 — grow the corpus toward 500).
+#
+# Instead of hand-writing hundreds of spec dicts, we drive generation from a
+# small per-source configuration: an issuing organisation (with canonical gold
+# name + full name + scope + funding type) and a pool of (title, body) seeds.
+# For each seed we deterministically derive a unique id, a deadline/opening/
+# amount, and a train/test split, and reuse _mk_example so prose, NER spans and
+# structured ``expected`` stay in agreement. This keeps the corpus maintainable.
+#
+# New sources added here: Inserm, CNRS, Inria, Inrae, Bettencourt (Fondation Bs),
+# BPI, Horizon Europe (Commission européenne) and generic university/CHU calls.
+# ---------------------------------------------------------------------------
+
+import itertools as _it
+
+# month (1-12) and day pairs; deterministic pseudo-random but reproducible.
+_seed = _it.cycle([
+    (1, 28), (2, 15), (3, 10), (4, 20), (5, 5), (6, 30),
+    (7, 12), (8, 18), (9, 25), (10, 1), (11, 8), (12, 22),
+])
+_dl_variants = _it.cycle([0, 0, 1, 2, 0])
+_amounts = _it.cycle([120000, 250000, 500000, 90000, 360000, 180000,
+                      600000, 75000, 280000, 430000])
+_amt_variants = _it.cycle([0, 1, 3, 2, 0])
+
+
+def _scale_from_conf(prefix, org, org_full, scope, funding_type, seeds, variants=1):
+    """Build one Example per seed (×``variants``) with derived fields.
+
+    Each variant rotates the year (2028→2030) and produces a distinct id so the
+    generated docs are reproducible yet varied in dates/amounts without more
+    hand-written seeds.
+    """
+    out = []
+    for i, (title, body) in enumerate(seeds):
+        for v in range(variants):
+            year = 2028 + v
+            month, day = _seed.__next__()
+            dl_v = _dl_variants.__next__()
+            amt = _amounts.__next__()
+            amt_v = _amt_variants.__next__()
+            # opening = 6 months before deadline (same year unless month <= 6)
+            open_month = month - 6 if month > 6 else month + 6
+            open_day = min(day, 28)  # keep the opening day valid for any month
+            split = "test" if i % 3 == 0 else "train"
+            eid = f"{prefix}-{i:03d}-{year}" if variants > 1 else f"{prefix}-{i:03d}"
+            url = f"https://example.org/aaps/{prefix}/{i:03d}" if variants == 1 else f"https://example.org/aaps/{prefix}/{i:03d}-{year}"
+            topics = _topics_for(title)
+            body_for_doc = body + " Thématiques : " + ", ".join(topics) + "."
+            ex = _mk_example(
+                eid, split, url,
+                title=title, org=org, org_full=org_full,
+                body=[body_for_doc],
+                deadline=dict(day=day, month=month, year=year, variant=dl_v),
+                opening=dict(day=open_day, month=open_month, year=year),
+                amount=dict(value=amt, variant=amt_v),
+                expected_extra={
+                    "geographical_scope": scope,
+                    "funding_type": funding_type,
+                    "research_topics": topics,
+                },
+            )
+            out.append(ex)
+    return out
+
+
+# Topic keyword lists so that expected.research_topics stays document-consistent.
+_TOPIC_POOLS: dict[str, list[str]] = {
+    "Inserm": ["biologie cellulaire", "génétique", "immunologie", "santé publique"],
+    "CNRS": ["physique", "chimie", "mathématiques", "sciences de la matière"],
+    "Inria": ["intelligence artificielle", "algorithmique", "cybersécurité", "calcul haute performance"],
+    "Inrae": ["agronomie", "alimentation", "environnement", "ressources naturelles"],
+    "Bettencourt": ["sciences de la vie", "physique", "chimie", "mathématiques"],
+    "BPI": ["innovation", "deep tech", "biotechnologies", "manufacture avancée"],
+    "Commission européenne": ["santé", "climat", "intelligence artificielle", "énergie"],
+    "CHU": ["recherche clinique", "santé publique", "innovation médicale"],
+    "AP-HP": ["recherche translationnelle", "épidémiologie", "essais cliniques"],
+    "Institut Pasteur": ["microbiologie", "infectiologie", "virologie", "immunologie"],
+    "ADEME": ["transition écologique", "énergie", "éco-conception", "biodiversité"],
+    "AFM-Téléthon": ["maladies rares", "thérapie génique", "biologie moléculaire", "muscle"],
+    "ANSM": ["pharmacovigilance", "médicaments", "essais cliniques", "sécurité sanitaire"],
+    "Fondation pour la Recherche sur Alzheimer": ["maladie d'Alzheimer", "neurodégénérescence", "neurobiologie", "accompagnement"],
+}
+
+
+def _topics_for(title: str) -> list[str]:
+    low = title.lower()
+    # Deterministically pick two topics from the source-agnostic pool based on
+    # the title hash so it is stable and document-consistent enough.
+    import hashlib
+
+    h = int(hashlib.md5(low.encode()).hexdigest(), 16)
+    all_topics = sorted({t for ts in _TOPIC_POOLS.values() for t in ts})
+    return [all_topics[h % len(all_topics)],
+            all_topics[(h // 7) % len(all_topics)]]
+
+
+_NEW_SOURCE_SEEDS = {
+    "inserm": ("Inserm", "Institut national de la santé et de la recherche médicale", "France", "subvention", [
+        ("Physiopathologie des maladies métaboliques", "Recherche sur les mécanismes moléculaires du diabète et de l'obésité."),
+        ("Immunité et maladies infectieuses", "Étude des réponses immunitaires aux pathogènes émergents."),
+        ("Génétique des maladies rares", "Identification de variants génétiques associés aux maladies rares."),
+        ("Neurosciences intégratives", "Approches multi-échelles du fonctionnement cérébral."),
+        ("Santé publique et inégalités", "Recherche sur les déterminants sociaux de la santé."),
+        ("Médecine régénérative", "Thérapies cellulaires pour la réparation des tissus."),
+        ("Épidémiologie génétique", "Étude des facteurs génétiques de susceptibilité aux maladies communes."),
+        ("Pharmacologie translationnelle", "Du banc à la clinique pour de nouvelles cibles thérapeutiques."),
+        ("Microbiote et santé", "Rôle du microbiote intestinal dans la santé et la maladie."),
+        ("Cancers et microenvironnement", "Interaction entre tumeurs et environnement tissulaire."),
+        ("Maladies cardiovasculaires", "Mécanismes de l'athérosclérose et de l'insuffisance cardiaque."),
+        ("Vieillissement et santé", "Biologie du vieillissement et prévention de la dépendance."),
+        ("Cancérogenèse moléculaire", "Mécanismes cellulaires de l'initiation tumorale."),
+        ("Immunothérapie des cancers", "Nouvelles approches immunologiques en oncologie."),
+        ("Biomarqueurs cliniques", "Validation de marqueurs pour la stratification des patients."),
+        ("Maladies neurodégénératives", "Mécanismes d'Alzheimer et de Parkinson."),
+        ("Obésité et métabolisme", "Régulation de la prise alimentaire et du métabolisme."),
+        ("Allergologie fondamentale", "Mécanismes immunologiques de l'allergie."),
+        ("Réparation de l'ADN", "Mécanismes de maintien de l'intégrité génomique."),
+        ("Horloge biologique", "Rythmes circadiens et santé métabolique."),
+        ("Maladies infectieuses émergentes", "Surveillance et réponses aux épidémies."),
+        ("Nutrition et vieillissement", "Impact de l'alimentation sur le vieillissement."),
+        ("Tolérance immunitaire", "Mécanismes de la tolérance et de l'auto-immunité."),
+        ("Épigénétique et cancer", "Méthylation et organisation de la chromatine."),
+        ("Neuroréparation", "Stratégies de régénération nerveuse."),
+        ("Santé environnementale", "Exposome et effet des polluants."),
+        ("thérapie génique", "Correction de gènes pour les maladies monogéniques."),
+        ("Signatures immunologiques", "Profils d'expression dans les maladies inflammatoires."),
+        ("Microcirculation", "Physiologie de la microcirculation tissulaire."),
+        ("Réponse au stress cellulaire", "Protéostase et stress du réticulum endoplasmique."),
+    ]),
+    "cnrs": ("CNRS", "Centre national de la recherche scientifique", "France", "subvention", [
+        ("Matériaux quantiques", "Exploration des états quantiques de la matière."),
+        ("Catalyse durable", "Nouveaux catalyseurs pour la chimie verte."),
+        ("Mathématiques et modèles", "Développement de modèles mathématiques pour la science."),
+        ("Sciences de l'univers", "Astrophysique et cosmologie observationnelle."),
+        ("Chimie des matériaux", "Synthèse de matériaux fonctionnels avancés."),
+        ("Physique des hautes énergies", "Particules élémentaires et interactions fondamentales."),
+        ("Sciences du vivant", "Biologie structurale et dynamique des macromolécules."),
+        ("Océans et climat", "Étude des interactions océan-atmosphère."),
+        ("Science des données", "Méthodes statistiques et apprentissage."),
+        ("Environnement et biodiversité", "Écologie fonctionnelle et conservation."),
+    ]),
+    "inria": ("Inria", "Institut national de recherche en informatique et en automatique", "France", "subvention", [
+        ("Apprentissage profond", "Méthodes d'apprentissage pour de nouveaux domaines."),
+        ("Robotique autonome", "Cognition et commande de systèmes robotiques."),
+        ("Cybersécurité systémique", "Sécurité des systèmes critiques."),
+        ("Calcul haute performance", "Algorithmes efficaces pour exascale."),
+        ("Interaction homme-machine", "Interfaces et conception centrée utilisateur."),
+        ("Optimisation combinatoire", "Algorithmes d'optimisation à grande échelle."),
+        ("Traitement du langage", "Modèles de langage pour le français et les domaines spécialisés."),
+        ("Vision par ordinateur", "Analyse d'images et de vidéos."),
+        ("Informatique quantique", "Algorithmes et simulation quantique."),
+        ("Systèmes distribués", "Fiabilité et passage à l'échelle."),
+    ]),
+    "inrae": ("Inrae", "Institut national de recherche pour l'agriculture, l'alimentation et l'environnement", "France", "subvention", [
+        ("Agroécologie", "Conception de systèmes agricoles durables."),
+        ("Alimentation et santé", "Nutrition, sécurité sanitaire et comportements alimentaires."),
+        ("Gestion de l'eau", "Durabilité des ressources en eau."),
+        ("Biodiversité agricole", "Préservation des ressources génétiques végétales et animales."),
+        ("Transition bas carbone", "Réduction des émissions agricoles."),
+        ("Forêts et climat", "Adaptation des écosystèmes forestiers."),
+        ("Sols et fertilité", "Mécanismes de la santé des sols."),
+        ("Élevage durable", "Bien-être animal et durabilité de l'élevage."),
+        ("Sciences des océans côtiers", "Écosystèmes marins et côtières."),
+        ("Bioéconomie", "Valorisation de la biomasse et des coproduits."),
+    ]),
+    "bettencourt": ("Bettencourt", "Fondation Bettencourt Schueller", "France", "subvention", [
+        ("Coup d'élan pour la recherche", "Soutien à des projets scientifiques prometteurs."),
+        ("Sciences chimiques", "Recherche en chimie fondamentale et appliquée."),
+        ("Sciences de la vie", "Biologie et santé."),
+        ("Sciences de la matière", "Physique et matériaux."),
+        ("Innovation numérique", "Sciences informatiques et mathématiques."),
+        ("Dispositifs médicaux", "Technologies pour la santé."),
+        ("Physique théorique", "Recherche fondamentale en physique."),
+        ("Bioingénierie", "Ingénierie du vivant."),
+        ("Chimie médicinale", "Synthèse de molécules thérapeutiques."),
+        ("Environnement et énergie", "Solutions durables pour l'énergie."),
+    ]),
+    "bpi": ("BPI", "Bpifrance", "France", "subvention", [
+        ("Innovation industrielle", "Soutien aux projets de rupture dans l'industrie."),
+        ("Deep tech d'envergure", "Startups technologiques à fort potentiel."),
+        ("Biotechnologies", "Développement de solutions biotech."),
+        ("Manufacture avancée", "Usines du futur et fabrication additive."),
+        ("Mobilité durable", "Transport et énergie."),
+        ("Intelligence artificielle appliquée", "Déploiement de l'IA en entreprise."),
+        ("Santé et innovation", "Nouvelles solutions de santé."),
+        ("Agritech", "Technologies agricoles."),
+        ("Énergie propre", "Transition énergétique."),
+        ("Cybersécurité des PME", "Protection des entreprises."),
+    ]),
+    "europe": ("Commission européenne", "Commission européenne", "Europe", "subvention", [
+        ("Horizon Europe - Santé", "Projets collaboratifs pour la santé."),
+        ("Mission climat", "Recherche et innovation pour la neutralité carbone."),
+        ("IA de confiance", "Intelligence artificielle éthique et fiable."),
+        ("Océans propres", "Protection des écosystèmes marins."),
+        ("Villes intelligentes", "Solutions pour des villes durables."),
+        ("Alimentation durable", "Systèmes alimentaires européens."),
+        ("Énergie nucléaire de fusion", "Recherche sur la fusion."),
+        ("Agence spatiale", "Technologies spatiales."),
+        ("Maladies chroniques", "Prévention et soins."),
+        ("Biocarburants", "Carburants durables."),
+    ]),
+    "chu": ("CHU Grenoble Alpes", "Centre hospitalier universitaire Grenoble Alpes", "France", "subvention", [
+        ("Recherche clinique hospitalière", "Études cliniques multicentriques."),
+        ("Innovation diagnostique", "Nouveaux biomarqueurs et imagerie."),
+        ("Santé mentale et parcours", "Amélioration des parcours de soins."),
+        ("Télémédecine", "Déploiement des soins à distance."),
+        ("Médecine personnalisée", "Génomique appliquée à la clinique."),
+        ("Évaluation des soins", "Économie de la santé et qualité."),
+        ("Urgences vitales", "Prise en charge des urgences."),
+        ("Chirurgie innovante", "Nouvelles techniques chirurgicales."),
+    ]),
+    "ap_hopital": ("AP-HP", "Assistance Publique - Hôpitaux de Paris", "France", "subvention", [
+        ("Recherche translationnelle", "Transfert de la recherche vers la clinique."),
+        ("Épidémiologie clinique", "Cohortes et données de santé."),
+        ("Essais cliniques précoces", "Premières administrations à l'homme."),
+        ("Innovation thérapeutique", "Nouvelles thérapies ciblées."),
+        ("Santé numérique hospitalière", "Données et algorithmes en milieu hospitalier."),
+        ("Médecine de précision", "Stratification des patients."),
+    ]),
+    "pasteur": ("Institut Pasteur", "Institut Pasteur", "France", "subvention", [
+        ("Résistance antimicrobienne", "Mécanismes et nouvelles stratégies antibactériennes."),
+        ("Virus émergents", "Détection et réponse aux pandémies."),
+        ("Microbiote et pathogènes", "Interactions hôte-microbes."),
+        ("Vaccins innovants", "Développement de nouveaux vaccins."),
+        ("Neurosciences infectieuses", "Impact des pathogènes sur le cerveau."),
+        ("Immunologie des maladies infectieuses", "Réponses immunitaires aux agents infectieux."),
+        ("Épidémiologie moléculaire", "Surveillance génomique des épidémies."),
+        ("Pathogènes zoonotiques", "Transmission des maladies animales."),
+        ("Microbiologie structurale", "Cryo-microscopie et biologie structurale des pathogènes."),
+        ("Santé mondiale", "Approches globales des maladies infectieuses."),
+    ]),
+    "ademe": ("ADEME", "Agence de la transition écologique", "France", "subvention", [
+        ("Décarbonation de l'industrie", "Réduction des émissions industrielles."),
+        ("Éco-conception", "Conception durable des produits."),
+        ("Mobilité bas carbone", "Transports et carburants durables."),
+        ("Bâtiment durable", "Rénovation énergétique et matériaux biosourcés."),
+        ("Économie circulaire", "Recyclage et valorisation des déchets."),
+        ("Énergies renouvelables", "Solaire, éolien et biomasse."),
+        ("Biodiversité et entreprises", "Intégration de la biodiversité."),
+        ("Adaptation au changement climatique", "Solutions fondées sur la nature."),
+        ("Hydrogène vert", "Production et usages de l'hydrogène décarboné."),
+        ("Agriculture régénérative", "Sols vivants et agroécologie."),
+    ]),
+    "afm": ("AFM-Téléthon", "Association française contre les myopathies", "France", "subvention", [
+        ("Myopathies et dystrophies", "Maladies neuromusculaires."),
+        ("Thérapie génique des maladies rares", "Correcteurs génétiques de l'ADN."),
+        ("Essais de thérapie cellulaire", "Cellules souches et muscle."),
+        ("Guide des maladies neuromusculaires", "Diagnostic et prise en charge."),
+        ("Recherche génétique translationnelle", "De la mutation au traitement."),
+        ("Innovation biothérapeutique", "Nouvelles approches thérapeutiques."),
+        ("Coordination des essais cliniques", "Organisation des essais en Europe."),
+        ("Imagerie du muscle", "Scanographie et IRM musculaires."),
+        ("Dystrophie de Duchenne", "Recherche spécifique sur la DMD."),
+        ("Amyotrophie spinale", "Traitements de la SMA."),
+    ]),
+    "ansm": ("ANSM", "Agence nationale de sécurité du médicament et des produits de santé", "France", "subvention", [
+        ("Pharmacovigilance", "Surveillance des effets indésirables."),
+        ("Pharmacoépidémiologie", "Études sur les populations exposées."),
+        ("Essais cliniques biomédicaux", "Évaluation des médicaments en développement."),
+        ("Sécurité de l'automédication", "Bon usage des médicaments sans ordonnance."),
+        ("Dispositifs médicaux", "Sécurité des dispositifs de santé."),
+        ("Produits de contraste", "Imagerie médicale et sécurité."),
+        ("Vaccinologie", "Surveillance des vaccins."),
+        ("Antibiorésistance", "Lutte contre la résistance aux antibiotiques."),
+        ("Signalements de santé", "Analyse des notifications d'incidents."),
+        ("Bonnes pratiques de laboratoire", "Qualité des essais non cliniques."),
+    ]),
+    "alzheimer": ("Fondation pour la Recherche sur Alzheimer", "Fondation pour la Recherche sur Alzheimer", "France", "subvention", [
+        ("Marqueurs précoces", "Détection précoce de la maladie."),
+        ("Neurobiologie de la mémoire", "Mécanismes du vieillissement cérébral."),
+        ("Imagerie cérébrale", "Neuro-imagerie et biomarqueurs."),
+        ("Prévention cognitive", "Programmes de stimulation cognitive."),
+        ("Aidants et accompagnement", "Soutien des proches aidants."),
+        ("Neuroprotéomique", "Protéines impliquées dans la neurodégénérescence."),
+        ("Mécanismes inflammatoires", "Neuro-inflammation et maladie d'Alzheimer."),
+        ("Thérapies non médicamenteuses", "Alternatives à la prise en charge."),
+        ("Syndromes apparentés", "Démences liées et mixtes."),
+        ("Génétique et facteurs de risque", "Susceptibilité héréditaire."),
+    ]),
+}
+
+_SCALE_EXAMPLES: list[Example] = []
+# Target total corpus size (README aims at 500-1,000). Compute the number of
+# per-seed year variants needed to reach ~target_total given the existing
+# hand-written + _PROG examples, up to a cap.
+_TARGET_TOTAL = 500
+_base_total = len(EXAMPLES)  # hand-written + _PROG (200 so far)
+_n_seeds = sum(len(v[4]) for v in _NEW_SOURCE_SEEDS.values())
+_needed = _TARGET_TOTAL - _base_total
+_variants = max(1, min(6, (int(_needed / _n_seeds) + 1))) if _needed > 0 else 1
+for _prefix, (_org, _org_full, _scope, _ftype, _seeds) in _NEW_SOURCE_SEEDS.items():
+    _SCALE_EXAMPLES += _scale_from_conf(
+        _prefix, _org, _org_full, _scope, _ftype, _seeds, variants=_variants
+    )
+
+EXAMPLES.extend(_SCALE_EXAMPLES)
+
+
+def _rebalance_splits(examples, val_ratio=0.15):
+    """Deterministically assign train/val/test splits for ML training.
+
+    The hand-written and generated examples carry only train/test markers. For
+    ML extractor training we want a proper hold-out structure:
+      * test  = dedicated held-out (kept isolated from any model development);
+      * val   = model-selection set, carved from the training pool;
+      * train = remaining training set.
+    Selection is deterministic (every Nth training example by stable id sort)
+    so corpus regeneration is reproducible and test stays disjoint from val.
+    """
+    train = [e for e in examples if e.split == "train"]
+    # Deterministic order, stable across runs.
+    train.sort(key=lambda e: e.id)
+    n_val = max(1, int(round(len(train) * val_ratio)))
+    for ex in train[:n_val]:
+        ex.split = "val"
+    return examples
+
 
 def main() -> None:
+    _rebalance_splits(EXAMPLES)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", encoding="utf-8") as fh:
         for ex in EXAMPLES:
@@ -4900,6 +5220,7 @@ def main() -> None:
     print(f"Wrote {len(EXAMPLES)} examples to {OUT}")
     print("  split test:", sum(1 for e in EXAMPLES if e.split == "test"))
     print("  split train:", sum(1 for e in EXAMPLES if e.split == "train"))
+    print("  split val:", sum(1 for e in EXAMPLES if e.split == "val"))
 
 
 if __name__ == "__main__":

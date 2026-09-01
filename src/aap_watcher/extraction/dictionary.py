@@ -41,6 +41,15 @@ ORGANISATIONS: list[tuple[str, list[str]]] = [
     ("Inserm", ["institut national de la sante", "institut national de la santé", "inserm"]),
     ("CNRS", ["centre national de la recherche scientifique", "cnrs"]),
     ("ANR", ["agence nationale de la recherche", "anr"]),
+    ("Inria", ["institut national de recherche en informatique", "inria"]),
+    ("Inrae", ["institut national de recherche pour l'agriculture", "inrae"]),
+    ("Bettencourt", ["bettencourt schueller", "bettencourt"]),
+    ("BPI", ["bpifrance", "bpi"]),
+    ("Institut Pasteur", ["institut pasteur", "pasteur"]),
+    ("ADEME", ["ademe", "agence de la transition écologique", "agence de la transition ecologique", "agence de l'environnement"]),
+    ("AFM-Téléthon", ["afm-telethon", "afm-téléthon", "association française contre les myopathies"]),
+    ("ANSM", ["ansm", "agence nationale de sécurité du médicament", "agence nationale de securite du medicament"]),
+    ("Fondation pour la Recherche sur Alzheimer", ["fondation pour la recherche sur alzheimer", "fondation recherche alzheimer", "recherche sur alzheimer"]),
 ]
 
 APPLICANTS = [

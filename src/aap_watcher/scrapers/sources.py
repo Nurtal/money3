@@ -6,9 +6,13 @@ all of them. New sources are registered here (see ``sources_catalog.py``).
 
 from __future__ import annotations
 
-from .anr import ANRScraper
 from .sources_catalog import (
+    AFMTéléthonScraper,
+    ANSMScraper,
+    ANRScraper,
     ARSScraper,
+    AdemeScraper,
+    AlzheimerScraper,
     AppelsProjetsRechercheScraper,
     BPIScraper,
     BZHScraper,
@@ -24,6 +28,7 @@ from .sources_catalog import (
     InriaScraper,
     InsermScraper,
     LigueContreLeCancerScraper,
+    PasteurScraper,
     ResearchConnectScraper,
     TeteCouScraper,
     ThesaurusScraper,
@@ -50,6 +55,11 @@ SOURCES = {
     "bzh": BZHScraper,
     "girci_go": GirciGoScraper,
     "europe": HorizonEuropeScraper,
+    "pasteur": PasteurScraper,
+    "ademe": AdemeScraper,
+    "afm": AFMTéléthonScraper,
+    "ansm": ANSMScraper,
+    "alzheimer": AlzheimerScraper,
 }
 
 

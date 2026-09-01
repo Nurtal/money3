@@ -6,7 +6,7 @@ from .datasets import EntityAnnotation, GoldExample, corpus_by_split, load_corpu
 from .error_analysis import ErrorCase, ErrorReport, analyse
 from .metrics import ExtractorResult, evaluate_extractor
 from .normalisation import normalize_amount, normalize_date, normalize_text, normalize_value
-from .reports import render_report
+from .reports import render_field_matrix, render_report
 from .runner import BenchmarkResult, run_benchmark
 
 __all__ = [
@@ -26,4 +26,5 @@ __all__ = [
     "ErrorReport",
     "analyse",
     "render_report",
+    "render_field_matrix",
 ]

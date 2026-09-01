@@ -61,6 +61,16 @@ _ORG_NAMES: list[tuple[str, list[re.Pattern]]] = [
     ("CHU de Lyon", [re.compile(r"CHU\s+de\s+Lyon")]),
     ("AP-HP", [re.compile(r"\bAP-HP\b"), re.compile(r"Assistance Publique")]),
     ("Commission européenne", [re.compile(r"Commission\s+europ[ée]enne")]),
+    ("Inria", [re.compile(r"\bInria\b"), re.compile(r"[Ii]nstitut national\s+de\s+recherche\s+(?:en\s+)?informatique")]),
+    ("Inrae", [re.compile(r"\bInrae\b"), re.compile(r"[Ii]nstitut national\s+de\s+recherche\s+(?:pour\s+l'agriculture|pour\s+l’agriculture)")]),
+    ("Bettencourt", [re.compile(r"Bettencourt")]),
+    ("BPI", [re.compile(r"\bBpifrance\b"), re.compile(r"\bBPI\b")]),
+    ("Institut Pasteur", [re.compile(r"Institut\s+Pasteur"), re.compile(r"\bPasteur\b")]),
+    ("ADEME", [re.compile(r"\bADEME\b"), re.compile(r"[Aa]gence\s+(?:de\s+la\s+)?transition\s+[ée]cologique"), re.compile(r"[Aa]gence\s+de\s+l'environnement")]),
+    ("AFM-Téléthon", [re.compile(r"AFM[- ]T[ée]l[ée]thon"), re.compile(r"Association\s+fran[çc]aise\s+contre\s+les\s+myopathies")]),
+    ("ANSM", [re.compile(r"\bANSM\b"), re.compile(r"[Aa]gence nationale\s+de\s+s[ée]curit[ée]\s+du\s+m[ée]dicament")]),
+    ("Fondation pour la Recherche sur Alzheimer", [re.compile(r"Fondation\s+(?:pour\s+la\s+)?[Rr]echerche\s+(?:sur\s+(?:la\s+)?|Alzheimer)")]),
+    ("ARS", [re.compile(r"\bARS\b")]),
 ]
 
 #: Announcer verbs that identify the organisation issuing the call.

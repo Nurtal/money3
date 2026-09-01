@@ -1,7 +1,11 @@
 from aap_watcher.scrapers.sources import available_sources, get_source
 from aap_watcher.scrapers.sources_catalog import (
+    AFMTéléthonScraper,
+    ANSMScraper,
     ANRScraper,
     ARSScraper,
+    AdemeScraper,
+    AlzheimerScraper,
     AppelsProjetsRechercheScraper,
     BPIScraper,
     BZHScraper,
@@ -17,6 +21,7 @@ from aap_watcher.scrapers.sources_catalog import (
     InriaScraper,
     InsermScraper,
     LigueContreLeCancerScraper,
+    PasteurScraper,
     ResearchConnectScraper,
     TeteCouScraper,
     ThesaurusScraper,
@@ -367,6 +372,91 @@ FIXTURES = {
         """,
         expect=["PHRC-N", "PHRIP"],
     ),
+    "pasteur": dict(
+        scraper=PasteurScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <div class="aap">
+          <h3><a href="https://research.pasteur.fr/fr/appels-a-projets/antimicrobial/">
+            Appel à projets : Recherche sur la résistance antimicrobienne</a></h3>
+        </div>
+        <div class="aap">
+          <h3><a href="https://research.pasteur.fr/fr/appels-a-projets/emerging-viruses/">
+            Appel à projets : Virus émergents et pandémies</a></h3>
+        </div>
+        </body></html>
+        """,
+        expect=["Antimicrobienne", "Virus émergents"],
+    ),
+    "ademe": dict(
+        scraper=AdemeScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <div class="position-relative card border-0">
+          <h5><a href="https://agirpourlatransition.ademe.fr/entreprises/appel-projets-decarbonation">
+            Appel à projets : Décarbonation de l'industrie</a></h5>
+        </div>
+        <div class="position-relative card border-0">
+          <h5><a href="https://agirpourlatransition.ademe.fr/entreprises/appel-projets-vehicules">
+            Appel à projets : Véhicules du futur</a></h5>
+        </div>
+        </body></html>
+        """,
+        expect=["Décarbonation", "Véhicules"],
+    ),
+    "afm": dict(
+        scraper=AFMTéléthonScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <div class="aap">
+          <h2><a href="https://www.afm-telethon.fr/recherche/appel-projets-myopathies">
+            Appel à projets : Myopathies et dystrophies musculaires</a></h2>
+        </div>
+        <div class="aap">
+          <h2><a href="https://www.afm-telethon.fr/recherche/appel-projets-gene-therapy">
+            Appel à projets : Thérapie génique des maladies rares</a></h2>
+        </div>
+        </body></html>
+        """,
+        expect=["Myopathies", "Thérapie génique"],
+    ),
+    "ansm": dict(
+        scraper=ANSMScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <div class="appel">
+          <h3><a href="https://ansm.sante.fr/appels-a-projets/pharmacovigilance">
+            Appel à projets : Pharmacovigilance et sécurité des médicaments</a></h3>
+        </div>
+        <div class="appel">
+          <h3><a href="https://ansm.sante.fr/appels-a-projets/essais-cliniques">
+            Appel à projets : Essais cliniques et biomédicaux</a></h3>
+        </div>
+        </body></html>
+        """,
+        expect=["Pharmacovigilance", "Essais cliniques"],
+    ),
+    "alzheimer": dict(
+        scraper=AlzheimerScraper,
+        link_in_block=True,
+        html="""
+        <html><body>
+        <div class="aap">
+          <h2><a href="https://www.fondation-alzheimer.org/appels-a-projets/neuroproteomique">
+            Appel à projets : Neuroprotéomique de la maladie d'Alzheimer</a></h2>
+        </div>
+        <div class="aap">
+          <h2><a href="https://www.fondation-alzheimer.org/appels-a-projets/accompagnement">
+            Appel à projets : Recherche sur l'accompagnement et les aidants</a></h2>
+        </div>
+        </body></html>
+        """,
+        expect=["Neuroprotéomique", "aidants"],
+    ),
 }
 
 SOURCES_UNDER_TEST = {
@@ -390,6 +480,11 @@ SOURCES_UNDER_TEST = {
     "bzh": BZHScraper,
     "girci_go": GirciGoScraper,
     "europe": HorizonEuropeScraper,
+    "pasteur": PasteurScraper,
+    "ademe": AdemeScraper,
+    "afm": AFMTéléthonScraper,
+    "ansm": ANSMScraper,
+    "alzheimer": AlzheimerScraper,
 }
 
 

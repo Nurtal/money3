@@ -2,10 +2,12 @@ from pathlib import Path
 
 from aap_watcher.benchmark import (
     analyse,
+    corpus_by_split,
     load_corpus,
     normalize_amount,
     normalize_date,
     normalize_text,
+    render_field_matrix,
     render_report,
     run_benchmark,
 )
@@ -36,6 +38,18 @@ def test_corpus_entity_offsets_match_text():
             )
 
 
+def test_corpus_train_val_test_splits_disjoint():
+    examples = load_corpus(CORPUS)
+    by = corpus_by_split(examples)
+    assert set(by) >= {"train", "val", "test"}
+    ids = {k: {e.id for e in v} for k, v in by.items()}
+    assert ids["test"].isdisjoint(ids["train"])
+    assert ids["test"].isdisjoint(ids["val"])
+    assert ids["val"].isdisjoint(ids["train"])
+    # A meaningful validation set must have been carved out.
+    assert len(ids["val"]) > 0
+
+
 def test_normalisation():
     assert normalize_date("15 octobre 2026") == "2026-10-15"
     assert normalize_date("15/10/2026") == "2026-10-15"
@@ -59,6 +73,18 @@ def test_benchmark_reports_nonempty():
     out = render_report(result)
     assert "regex" in out
     assert "F1" in out
+
+
+def test_field_matrix_renders_per_field():
+    examples = load_corpus(CORPUS)
+    result = run_benchmark(examples, [RegexExtractor()])
+    out = render_field_matrix(result)
+    assert "Per-field match matrix" in out
+    # Every compared field present in the corpus appears as a row.
+    assert "deadline" in out
+    assert "organisation" in out
+    # P/R/F1 cell format: "f1 (p/r)".
+    assert "(" in out and ")" in out
 
 
 def test_error_analysis_collects_mismatches():

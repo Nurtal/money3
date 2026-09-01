@@ -29,6 +29,9 @@ api = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
 ]
+pdf = [
+    "pypdf>=5.0",
+]
 
 [project.scripts]
 aap-watcher = "aap_watcher.cli:main"

@@ -28,6 +28,25 @@ def test_dictionary_extracts_organisation_and_topics():
     assert ex.amount_max is None  # dictionary does not do amounts
 
 
+_DICT_NEW_ORGS = [
+    ("Inria", "Appel à projets Inria sur l'apprentissage."),
+    ("Inrae", "Appel à projets Inrae en agroécologie."),
+    ("Bettencourt", "Appel à projets Fondation Bettencourt Schueller."),
+    ("BPI", "Appel à projets Bpifrance deep tech."),
+    ("Institut Pasteur", "Appel à projets Institut Pasteur microbiologie."),
+    ("ADEME", "Appel à projets ADEME décarbonation."),
+    ("AFM-Téléthon", "Appel à projets AFM-Téléthon maladies rares."),
+    ("ANSM", "Appel à projets ANSM pharmacovigilance."),
+    ("Fondation pour la Recherche sur Alzheimer", "Appel à projets Fondation pour la Recherche sur Alzheimer."),
+]
+
+
+def test_dictionary_detects_new_orgs():
+    for expected, body in _DICT_NEW_ORGS:
+        ex = DictionaryExtractor().extract(Document(text=body))
+        assert ex.organisation == expected, f"{expected}: got {ex.organisation!r}"
+
+
 def test_classical_nlp_extracts_title_and_eligibility_sentence():
     ex = ClassicalNLPExtractor().extract(_doc())
     assert ex.title == "Programme Cancer 2027"

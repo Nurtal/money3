@@ -1,0 +1,85 @@
+# Extractor strategy configurations.
+#
+# Mirrors the registry in src/aap_watcher/extraction/registry.py. Each extractor
+# implements the shared `Extractor` interface and is benchmarked on the same
+# corpus (ADR-0004). `enabled` controls whether it is instantiated for scraping/
+# monitoring and included in the benchmark.
+#
+# Optional-dependency strategies (spacy/transformers/llm) are only available
+# when their extra is installed; the registry skips them silently otherwise.
+
+extractors:
+  - name: regex
+    module: aap_watcher.extraction.regex
+    class: RegexExtractor
+    enabled: true
+    default: true
+
+  - name: dictionary
+    module: aap_watcher.extraction.dictionary
+    class: DictionaryExtractor
+    enabled: true
+    default: false
+
+  - name: classical_nlp
+    module: aap_watcher.extraction.classical_nlp
+    class: ClassicalNLPExtractor
+    enabled: true
+    default: false
+
+  - name: hybrid
+    module: aap_watcher.extraction.hybrid
+    class: HybridExtractor
+    enabled: true
+    default: true
+    composed_of: [regex, dictionary, classical_nlp]
+
+  - name: spacy_ner
+    module: aap_watcher.extraction.spacy_ner
+    class: SpacyNerExtractor
+    enabled: true
+    default: false
+    requires_extra: spacy
+    model: fr_core_news_md
+
+  - name: transformers_ner
+    module: aap_watcher.extraction.transformer_ner
+    class: CamemBertNerExtractor
+    enabled: false
+    requires_extra: transformers
+    model: camembert-base
+
+  - name: transformer_classifier
+    module: aap_watcher.extraction.transformer_classifier
+    class: TransformerClassifierExtractor
+    enabled: false
+    requires_extra: transformers
+    model: camembert-base
+
+  - name: llm
+    module: aap_watcher.extraction.llm
+    class: LLMExtractor
+    enabled: false
+    requires_extra: llm
+    model: gpt-4o
+    prompt_version: "v1"
+
+benchmark:
+  fields:
+    - title
+    - organisation
+    - amount_min
+    - amount_max
+    - currency
+    - deadline
+    - opening_date
+    - eligibility
+    - eligible_applicants
+    - research_topics
+    - geographical_scope
+    - funding_type
+    - status
+  regression_thresholds:
+    f1_delta: -0.02
+    recall_delta: -0.03
+    latency_delta_pct: 0.20

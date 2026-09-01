@@ -142,6 +142,28 @@ def test_chu_defaults_to_france_scope():
     assert ex.geographical_scope == "France"
 
 
+# The 9 source organisations added to broaden the corpus must be recognised by
+# the regex extractor (abbreviation or full name), and scope to France.
+_NEW_ORGS = [
+    ("Inria", "L'Inria lance un appel à projets sur l'apprentissage."),
+    ("Inrae", "L'Inrae lance un appel à projets en agroécologie."),
+    ("Bettencourt", "La Fondation Bettencourt Schueller soutient un prix."),
+    ("BPI", "Bpifrance lance un appel à projets deep tech."),
+    ("Institut Pasteur", "L'Institut Pasteur lance un appel sur la microbiologie."),
+    ("ADEME", "L'ADEME lance un appel à projets sur la décarbonation."),
+    ("AFM-Téléthon", "L'AFM-Téléthon lance un appel sur les maladies rares."),
+    ("ANSM", "L'ANSM lance un appel à projets en pharmacovigilance."),
+    ("Fondation pour la Recherche sur Alzheimer", "La Fondation pour la Recherche sur Alzheimer lance un appel."),
+]
+
+
+def test_new_orgs_detected_and_scope_france():
+    for expected, body in _NEW_ORGS:
+        ex = RegexExtractor().extract(Document(text=body))
+        assert ex.organisation == expected, f"{expected}: got {ex.organisation!r}"
+        assert ex.geographical_scope == "France", expected
+
+
 HORIZON_CODE = """
 Horizon Europe - Appel à projets : Santé 2028
 

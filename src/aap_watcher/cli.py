@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .benchmark import load_corpus, render_report, run_benchmark
+from .benchmark import load_corpus, render_field_matrix, render_report, run_benchmark
 from .benchmark.regression import detect_regressions, load_results, save_results
 from .database.models import make_engine, make_session_factory
 from .database.repository import Repository
@@ -80,6 +80,9 @@ def cmd_benchmark(args) -> int:
     extractors = available_extractors()
     result = run_benchmark(examples, extractors)
     print(render_report(result))
+    if args.field_matrix:
+        print()
+        print(render_field_matrix(result))
     if args.save:
         save_results(result, args.save)
         print(f"Saved results to {args.save}")
@@ -126,6 +129,7 @@ def main(argv: list[str] | None = None) -> int:
     p_bench.add_argument("--corpus", default=None, help=f"JSONL gold corpus (default: {_DEFAULT_CORPUS})")
     p_bench.add_argument("--split", default=None, help="Restrict to a split (train/val/test)")
     p_bench.add_argument("--save", default=None, help="Persist results JSON for regression tracking")
+    p_bench.add_argument("--field-matrix", action="store_true", help="Also print the per-field precision/recall/F1 matrix")
     p_bench.set_defaults(func=cmd_benchmark)
 
     p_reg = sub.add_parser("regression", help="Compare two saved benchmark results")
