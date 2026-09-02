@@ -11,13 +11,26 @@ commands.
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
-from sqlalchemy import Select, select
+from sqlalchemy import Select, func, or_, select
 
 from .database.models import AAPRecord, make_engine, make_session_factory
+
+_DISCLAIMER = (
+    "AAP Watcher is an aggregation tool and is not an authoritative source "
+    "for funding decisions. Always verify eligibility, amounts, deadlines and "
+    "application procedure on the official source."
+)
+
+
+def _record_to_response(rec: AAPRecord, include_disclaimer: bool = True) -> dict:
+    out = _record_to_dict(rec)
+    if include_disclaimer:
+        out["disclaimer"] = _DISCLAIMER
+    return out
+
 
 _INDEX_HTML = """<!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
@@ -35,10 +48,20 @@ td,th{border:1px solid #ccc;padding:.4rem;text-align:left;font-size:.9rem}</styl
     <option>open</option><option>closing_soon</option><option>closed</option>
     <option>cancelled</option><option>upcoming</option></select>
   <input id="topic" placeholder="topic">
+  <input id="funding_type" placeholder="type de financement">
+  <input id="eligible" placeholder="candidats éligibles">
+  <input id="deadline_after" placeholder="deadline après (YYYY-MM-DD)">
   <input id="deadline_before" placeholder="deadline avant (YYYY-MM-DD)">
   <input id="amount_min" placeholder="montant min" type="number">
+  <input id="amount_max" placeholder="montant max" type="number">
+  <select id="sort"><option value="">tri</option>
+    <option value="deadline_asc">échéance ↑</option>
+    <option value="deadline_desc">échéance ↓</option>
+    <option value="amount_asc">montant ↑</option>
+    <option value="amount_desc">montant ↓</option></select>
   <button type="submit">Rechercher</button>
 </form>
+<p id="count"></p>
 <table id="t"><thead><tr><th>Titre</th><th>Org</th><th>Échéance</th>
 <th>Montant</th><th>Statut</th></tr></thead><tbody></tbody></table>
 <script>
@@ -48,9 +71,15 @@ async function go(){
   const o=document.getElementById('org').value; if(o)p.set('organisation',o);
   const s=document.getElementById('status').value; if(s)p.set('status',s);
   const t=document.getElementById('topic').value; if(t)p.set('topic',t);
+  const f=document.getElementById('funding_type').value; if(f)p.set('funding_type',f);
+  const e=document.getElementById('eligible').value; if(e)p.set('eligible_applicants',e);
+  const a2=document.getElementById('deadline_after').value; if(a2)p.set('deadline_after',a2);
   const d=document.getElementById('deadline_before').value; if(d)p.set('deadline_before',d);
-  const a=document.getElementById('amount_min').value; if(a)p.set('amount_min',a);
+  const mn=document.getElementById('amount_min').value; if(mn)p.set('amount_min',mn);
+  const mx=document.getElementById('amount_max').value; if(mx)p.set('amount_max',mx);
+  const so=document.getElementById('sort').value; if(so)p.set('sort',so);
   const r=await fetch('/api/aaps?'+p); const j=await r.json();
+  document.getElementById('count').textContent=j.total+' résultat(s)';
   const tb=document.querySelector('#t tbody'); tb.innerHTML='';
   for(const x of j.items){const tr=document.createElement('tr');
     tr.innerHTML=`<td>${x.title||''}</td><td>${x.organisation||''}</td>
@@ -119,38 +148,71 @@ def create_app(db_url: str = "sqlite:///aap_watcher.db") -> FastAPI:
 
     @app.get("/api/aaps")
     def list_aaps(
-        q: Optional[str] = Query(None, description="Full-text search"),
-        organisation: Optional[str] = None,
-        status: Optional[str] = None,
-        topic: Optional[str] = None,
-        deadline_before: Optional[str] = None,
-        amount_min: Optional[int] = None,
+        q: str | None = Query(None, description="Full-text search (space-separated terms, AND)",
+                                  examples=["cancer ai"]),
+        organisation: str | None = None,
+        status: str | None = None,
+        topic: str | None = None,
+        funding_type: str | None = None,
+        eligible_applicants: str | None = None,
+        geographical_scope: str | None = None,
+        deadline_after: str | None = None,
+        deadline_before: str | None = None,
+        amount_min: int | None = None,
+        amount_max: int | None = None,
+        sort: str | None = Query(None, description="deadline_asc|deadline_desc|amount_asc|amount_desc"),
         limit: int = Query(50, ge=1, le=500),
         offset: int = Query(0, ge=0),
     ) -> dict:
-        stmt: Select = select(AAPRecord)
+        _SEARCH_COLS = (
+            AAPRecord.title, AAPRecord.description, AAPRecord.eligibility,
+            AAPRecord.organisation, AAPRecord.research_topics,
+        )
+        conds: list = []
         if q:
-            like = f"%{q}%"
-            stmt = stmt.where(
-                (AAPRecord.title.ilike(like))
-                | (AAPRecord.eligibility.ilike(like))
-                | (AAPRecord.description.ilike(like))
-                | (AAPRecord.organisation.ilike(like))
-            )
+            for term in q.split():
+                like = f"%{term}%"
+                conds.append(or_(*(c.ilike(like) for c in _SEARCH_COLS)))
         if organisation:
-            stmt = stmt.where(AAPRecord.organisation.ilike(f"%{organisation}%"))
+            conds.append(AAPRecord.organisation.ilike(f"%{organisation}%"))
         if status:
-            stmt = stmt.where(AAPRecord.status == status)
+            conds.append(AAPRecord.status == status)
         if topic:
-            stmt = stmt.where(AAPRecord.research_topics.ilike(f"%{topic}%"))
+            conds.append(AAPRecord.research_topics.ilike(f"%{topic}%"))
+        if funding_type:
+            conds.append(AAPRecord.funding_type.ilike(f"%{funding_type}%"))
+        if eligible_applicants:
+            conds.append(AAPRecord.eligible_applicants.ilike(f"%{eligible_applicants}%"))
+        if geographical_scope:
+            conds.append(AAPRecord.geographical_scope.ilike(f"%{geographical_scope}%"))
+        if deadline_after:
+            conds.append(AAPRecord.deadline >= deadline_after)
         if deadline_before:
-            stmt = stmt.where(AAPRecord.deadline <= deadline_before)
+            conds.append(AAPRecord.deadline <= deadline_before)
         if amount_min is not None:
-            stmt = stmt.where(AAPRecord.amount_max >= amount_min)
-        stmt = stmt.order_by(AAPRecord.deadline.asc().nullslast()).limit(limit).offset(offset)
+            conds.append(AAPRecord.amount_max >= amount_min)
+        if amount_max is not None:
+            conds.append(AAPRecord.amount_min <= amount_max)
+        stmt: Select = select(AAPRecord)
+        for c in conds:
+            stmt = stmt.where(c)
+        order = {
+            "deadline_asc": (AAPRecord.deadline.asc().nullslast(),),
+            "deadline_desc": (AAPRecord.deadline.desc().nullslast(),),
+            "amount_asc": (AAPRecord.amount_max.asc().nullslast(),),
+            "amount_desc": (AAPRecord.amount_max.desc().nullslast(),),
+        }.get(sort, (AAPRecord.deadline.asc().nullslast(),))
+        stmt = stmt.order_by(*order)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
         with _sf()() as session:
-            rows = list(session.scalars(stmt).all())
-            return {"items": [_record_to_dict(r) for r in rows], "count": len(rows)}
+            total = session.scalar(count_stmt) or 0
+            rows = list(session.scalars(stmt.limit(limit).offset(offset)).all())
+            return {
+                "items": [_record_to_response(r) for r in rows],
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+            }
 
     @app.get("/api/aaps/{aap_id}")
     def get_aap(aap_id: int) -> dict:
@@ -158,7 +220,7 @@ def create_app(db_url: str = "sqlite:///aap_watcher.db") -> FastAPI:
             rec = session.get(AAPRecord, aap_id)
             if rec is None:
                 raise HTTPException(status_code=404, detail="AAP not found")
-            return _record_to_dict(rec)
+            return _record_to_response(rec)
 
     @app.get("/api/aaps/{aap_id}/similar")
     def similar_aaps(aap_id: int, top: int = Query(5, ge=1, le=50)) -> list[dict]:
@@ -173,7 +235,7 @@ def create_app(db_url: str = "sqlite:///aap_watcher.db") -> FastAPI:
             ]
             scored.sort(key=lambda x: x[1], reverse=True)
             return [
-                {**_record_to_dict(other), "similarity": round(score, 3)}
+                {**_record_to_response(other), "similarity": round(score, 3)}
                 for other, score in scored[:top] if score > 0
             ]
 
