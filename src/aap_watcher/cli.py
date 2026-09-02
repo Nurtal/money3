@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 from .benchmark import load_corpus, render_field_matrix, render_report, run_benchmark
@@ -12,6 +13,8 @@ from .database.models import make_engine, make_session_factory
 from .database.repository import Repository
 from .extraction.regex import RegexExtractor
 from .extraction.registry import available_extractors
+from .notify.base import ChangeNotice
+from .notify.email import EmailNotifier
 from .pipeline.run import run_once
 from .scrapers.sources import available_sources, get_source
 
@@ -44,29 +47,74 @@ def cmd_run(args) -> int:
 
 
 def cmd_monitor(args) -> int:
-    """One monitoring pass over all sources; reports new/changed/cancelled."""
-    engine = make_engine(args.db)
-    sf = make_session_factory(engine)
-    repo = Repository(sf)
-    repo.init_db(engine)
+    """One monitoring pass over all sources; reports new/changed/cancelled.
 
-    extractor = RegexExtractor()
-    total = {"processed": 0, "new": 0, "modified": 0, "deadline_changed": 0, "cancelled": 0}
-    for name in available_sources():
-        scraper = get_source(name)
-        try:
-            summary = run_once(scraper, extractor, repo)
-        except Exception as exc:  # noqa: BLE001
-            print(f"[warn] source '{name}' failed: {exc}")
+    With ``--notify`` an email digest of the changes is sent (SMTP via env
+    vars). With ``--schedule`` the pass keeps running on an interval so a
+    single process can monitor continuously (cron remains the recommended
+    production scheduling option).
+    """
+    notifier = EmailNotifier.from_env() if args.notify else None
+
+    def _one_pass() -> dict:
+        engine = make_engine(args.db)
+        sf = make_session_factory(engine)
+        repo = Repository(sf)
+        repo.init_db(engine)
+        extractor = RegexExtractor()
+        total = {"processed": 0, "new": 0, "modified": 0, "deadline_changed": 0, "cancelled": 0}
+        pending: list[ChangeNotice] = []
+        for name in available_sources():
+            scraper = get_source(name)
+            try:
+                summary = run_once(scraper, extractor, repo)
+            except Exception as exc:  # noqa: BLE001
+                print(f"[warn] source '{name}' failed: {exc}")
+                scraper.close()
+                continue
             scraper.close()
-            continue
-        scraper.close()
-        for k in total:
-            total[k] += summary.get(k, 0)
-        if any(summary.get(k, 0) for k in ("new", "modified", "deadline_changed", "cancelled")):
-            print(f"[{name}] changes: {summary}")
-    print(f"Monitor pass complete: {total}")
-    return 0
+            for k in ("new", "modified", "deadline_changed", "cancelled"):
+                total[k] += summary.get(k, 0)
+            total["processed"] += summary.get("processed", 0)
+            if notifier is not None:
+                for ev in summary.get("events", []):
+                    if repo.was_notified(ev.key, ev.version):
+                        continue
+                    rec = repo.latest(ev.key)
+                    pending.append(_notice_from_record(ev, rec))
+            if any(summary.get(k, 0) for k in ("new", "modified", "deadline_changed", "cancelled")):
+                print(f"[{name}] changes: {summary}")
+        if notifier is not None and pending:
+            notifier.send(pending)
+            for n in pending:
+                repo.mark_notified(n.key, n.version, n.type)
+            print(f"[notify] sent {len(pending)} change(s) by email")
+        print(f"Monitor pass complete: {total}")
+        return total
+
+    if not args.schedule:
+        _one_pass()
+        return 0
+
+    seconds = 86400 if args.schedule.lower() == "daily" else 3600
+    while True:
+        _one_pass()
+        print(f"[schedule] next pass in {seconds}s (Ctrl-C to stop)")
+        time.sleep(seconds)
+
+
+def _notice_from_record(ev, rec) -> ChangeNotice:  # noqa: ANN001
+    return ChangeNotice(
+        type=ev.type,
+        key=ev.key,
+        version=ev.version,
+        title=rec.title if rec else None,
+        organisation=rec.organisation if rec else None,
+        deadline=rec.deadline if rec else None,
+        status=rec.status if rec else None,
+        application_url=rec.application_url if rec else None,
+        source_url=rec.source_url if rec else None,
+    )
 
 
 def cmd_benchmark(args) -> int:
@@ -123,6 +171,10 @@ def main(argv: list[str] | None = None) -> int:
 
     p_mon = sub.add_parser("monitor", help="Monitoring pass over all sources (detect new/changed/cancelled)")
     p_mon.add_argument("--db", default="sqlite:///aap_watcher.db")
+    p_mon.add_argument("--notify", action="store_true",
+                       help="Send an email digest of the detected changes (SMTP via AAP_SMTP_* env vars)")
+    p_mon.add_argument("--schedule", default=None, choices=["daily", "hourly"],
+                       help="Keep running and repeat the pass on this interval (cron is the recommended alternative)")
     p_mon.set_defaults(func=cmd_monitor)
 
     p_bench = sub.add_parser("benchmark", help="Run extraction benchmark on gold corpus")

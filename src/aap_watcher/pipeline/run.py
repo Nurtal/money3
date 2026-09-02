@@ -26,6 +26,7 @@ def run_once(
     we tally new vs modified so the monitor can report what changed.
     """
     counts = {"processed": 0, "new": 0, "modified": 0, "deadline_changed": 0, "cancelled": 0}
+    events = []
     for doc in scraper.discover(html=html):
         assert isinstance(doc, Document)
         extraction = extractor.extract(doc)
@@ -38,4 +39,7 @@ def run_once(
         counts["processed"] += 1
         if event.type in counts:
             counts[event.type] += 1
+        if event.type != "unchanged":
+            events.append(event)
+    counts["events"] = events
     return counts

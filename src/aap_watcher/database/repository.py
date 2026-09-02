@@ -16,7 +16,7 @@ from typing import Optional
 from sqlalchemy import select
 
 from ..benchmark.normalisation import normalize_text, normalize_value
-from .models import AAPRecord, Base, RawDocument
+from .models import AAPRecord, Base, Notification, RawDocument
 
 _COMPARED = (
     "title", "organisation", "description", "amount_max", "currency",
@@ -74,6 +74,41 @@ class Repository:
     def save_raw(self, source_url: str, body: str, content_type: Optional[str] = None) -> None:
         with self._sf() as session:
             session.add(RawDocument(source_url=source_url, body=body, content_type=content_type))
+            session.commit()
+
+    def was_notified(self, dedupe_key: str, version: int) -> bool:
+        """True if this AAP version's change was already sent in a notification."""
+        with self._sf() as session:
+            return (
+                session.scalar(
+                    select(Notification.id).where(
+                        Notification.dedupe_key == dedupe_key,
+                        Notification.version == version,
+                    )
+                )
+                is not None
+            )
+
+    def mark_notified(
+        self, dedupe_key: str, version: int, event_type: Optional[str] = None
+    ) -> None:
+        """Record that a change event for this AAP version was notified."""
+        with self._sf() as session:
+            row = session.scalar(
+                select(Notification).where(
+                    Notification.dedupe_key == dedupe_key,
+                    Notification.version == version,
+                )
+            )
+            if row is not None:
+                return
+            session.add(
+                Notification(
+                    dedupe_key=dedupe_key,
+                    version=version,
+                    event_type=event_type or "",
+                )
+            )
             session.commit()
 
     @staticmethod
