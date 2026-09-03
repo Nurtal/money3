@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy import Select, func, or_, select
 
 from .database.models import AAPRecord, make_engine, make_session_factory
+from .discovery.scoring import Matchable, rank
 
 _DISCLAIMER = (
     "AAP Watcher is an aggregation tool and is not an authoritative source "
@@ -238,6 +239,40 @@ def create_app(db_url: str = "sqlite:///aap_watcher.db") -> FastAPI:
                 {**_record_to_response(other), "similarity": round(score, 3)}
                 for other, score in scored[:top] if score > 0
             ]
+
+    @app.get("/api/profile/matches")
+    def profile_matches(
+        topics: str | None = Query(None, description="Comma-separated research topics"),
+        technologies: str | None = Query(None, description="Comma-separated technologies"),
+        amount_min: int | None = Query(None, description="Minimum funding sought"),
+        geographies: str | None = Query(None, description="Comma-separated geographies"),
+        limit: int = Query(50, ge=1, le=500),
+    ) -> dict:
+        research_topics = [t.strip() for t in topics.split(",") if t.strip()] if topics else []
+        tech_terms = [t.strip() for t in technologies.split(",") if t.strip()] if technologies else []
+        geo_terms = [g.strip() for g in geographies.split(",") if g.strip()] if geographies else []
+        with _sf()() as session:
+            rows = list(session.scalars(select(AAPRecord)).all())
+        items = [
+            Matchable(
+                id=r.id, title=r.title,
+                topics=[t for t in (r.research_topics or "").split(", ") if t],
+                amount_max=r.amount_max, geographical_scope=r.geographical_scope, status=r.status,
+            )
+            for r in rows
+        ]
+        ranked = rank(
+            research_topics=research_topics, technologies=tech_terms,
+            amount_min=amount_min, geographies=geo_terms, item_pool=items,
+        )
+        by_id = {r.id: r for r in rows}
+        out = []
+        for m, rel in ranked[:limit]:
+            rec = by_id.get(m.id)
+            if rec is None:
+                continue
+            out.append({**_record_to_response(rec), "relevance": rel})
+        return {"items": out, "total": len(out)}
 
     @app.get("/api/sources")
     def list_sources() -> list[str]:
