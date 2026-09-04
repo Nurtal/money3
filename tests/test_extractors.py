@@ -101,9 +101,10 @@ def test_dictionary_expanded_topics():
 
 
 def test_dictionary_expanded_applicants():
-    text = "Candidats : CEA, MNHN, postdocs, organismes publics."
+    text = "Candidats : CEA, MNHN, postdocs, organismes publics, hôpitaux universitaires."
     ex = DictionaryExtractor().extract(Document(text=text))
     applicants = [a.lower() for a in ex.eligible_applicants]
     assert "cea" in applicants
     assert "mnhn" in applicants
     assert "postdocs" in applicants
+    assert "hôpitaux universitaires" in applicants

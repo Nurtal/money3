@@ -13,11 +13,9 @@ matches because the gold values are document-specific.
 
 from __future__ import annotations
 
-from typing import Optional
-
-from ..schema import AAPExtraction, AAPStatus, Provenance
+from ..schema import AAPExtraction, Provenance
 from ._status import detect_status
-from .base import Document, Extractor
+from .base import Document
 
 # (canonical gold value, [text patterns to look for])
 ORGANISATIONS: list[tuple[str, list[str]]] = [
@@ -54,7 +52,7 @@ ORGANISATIONS: list[tuple[str, list[str]]] = [
 ]
 
 APPLICANTS = [
-    "universités", "hôpitaux", "centres de recherche", "chu",
+    "universités", "hôpitaux", "hôpitaux universitaires", "centres de recherche", "chu",
     "cnrs", "inserm", "unités inserm", "instituts cnrs", "associations",
     "entreprises", "pme", "laboratoires", "grandes écoles",
     "instituts de recherche", "organisations de recherche", "jeunes chercheurs",
