@@ -631,6 +631,8 @@ if eligible_applicants:
 ```python
 if status:
     expected["status"] = status
+if eligible_applicants:
+    expected["eligible_applicants"] = eligible_applicants
 ```
 
 - [ ] **Step 7: Modify `_scale_from_conf()` to emit status, eligible_applicants, and applicant prose**
@@ -647,13 +649,14 @@ status = _derive_status(day, month, year)
 
 ```python
 applicants = _applicants_for(org)
-applicants_line = "Candidats : " + ", ".join(applicants) + "."
 ```
 
-3. Add to `body_for_doc`:
+(No `applicants_line` built here — `_mk_example` renders the prose when passed `eligible_applicants`.)
+
+3. Add to `body_for_doc` (topics only; applicants prose is rendered by `_mk_example` since we pass `eligible_applicants` in step 5):
 
 ```python
-body_for_doc = body + " Thématiques : " + ", ".join(topics) + ". " + applicants_line
+body_for_doc = body + " Thématiques : " + ", ".join(topics) + "."
 ```
 
 4. Add `status` and `eligible_applicants` to `expected_extra`:
@@ -668,13 +671,13 @@ expected_extra={
 },
 ```
 
-5. Pass `status=status` to `_mk_example()`.
+5. Pass both `status=status` and `eligible_applicants=applicants` to `_mk_example()`, so `_mk_example` renders the "Candidats : ..." prose line and the ELIGIBLE_APPLICANTS entity (do NOT render the applicants line inline in `_scale_from_conf`, to avoid prose duplication):
 
-- [ ] **Step 8: Modify hand-written EXAMPLES to backfill `status`**
+- [ ] **Step 8: Modify hand-written EXAMPLES to backfill `status` and `eligible_applicants`**
 
-For each hand-written example in `EXAMPLES` that has a deadline dict, add `status=_derive_status(day, month, year)` to its `_mk_example()` call. For examples without a deadline, add `status="open"`.
-
-Also, for each hand-written example that does NOT have an applicants prose line in its body, add one. (Most already have "Candidats éligibles : ..." or "Institutions : ..." — verify and standardise to "Candidats : ..." where missing.)
+For each hand-written example in `EXAMPLES`:
+1. If it has a deadline dict, add `status=_derive_status(day, month, year)` to its `_mk_example()` call. Without a deadline, add `status="open"`.
+2. If it has `eligible_applicants` in its `expected`/`expected_extra` dict, also pass `eligible_applicants=<list>` to `_mk_example()`, so `_mk_example` renders the "Candidats : ..." prose line and the ELIGIBLE_APPLICANTS entity. Where the example already renders applicants elsewhere in its hand-written body, prefer passing `eligible_applicants` to `_mk_example` and removing the duplicated prose from the body, so the entity offsets stay consistent.
 
 This is a mechanical edit across ~100 hand-written entries. Use `replaceAll` or targeted edits.
 
