@@ -96,3 +96,19 @@ def test_error_analysis_collects_mismatches():
     pred["title"] = None
     report = analyse("regex", [pred], [ex.expected], [ex.id])
     assert any(c.kind == "false_negative" and c.field == "title" for c in report.cases)
+
+
+def test_corpus_status_field_present():
+    examples = load_corpus(CORPUS)
+    with_status = [e for e in examples if e.expected.get("status")]
+    # At least 90% of examples should have a status.
+    assert len(with_status) >= len(examples) * 0.9
+
+
+def test_corpus_amount_min_has_range_prose():
+    examples = load_corpus(CORPUS)
+    with_min = [e for e in examples if e.expected.get("amount_min")]
+    for ex in with_min:
+        assert "à" in ex.text or "entre" in ex.text.lower(), (
+            f"[{ex.id}] amount_min={ex.expected['amount_min']} but no range prose in text"
+        )
