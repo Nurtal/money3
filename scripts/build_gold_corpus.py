@@ -3895,10 +3895,10 @@ def _amount_prose(amount: int, variant: int) -> str:
 
 _STATUS_PROSE_VARIANTS: list[tuple[str, str]] = [
     ("ouvert", "Appel ouvert."),
-    ("ouvert", "Ce appel à projets est ouvert."),
+    ("ouvert", "Cet appel à projets est ouvert."),
     ("ouvert", "Candidatures ouvertes."),
     ("upcoming", "Appel à venir, ouverture prévue prochainement."),
-    ("closed", "Ce appel est clôturé."),
+    ("closed", "Cet appel est clôturé."),
     ("closed", "Candidatures closes."),
     ("cancelled", "Appel annulé."),
     ("closing_soon", "Clôture prochaine, date limite imminente."),
@@ -5135,8 +5135,6 @@ def _scale_from_conf(prefix, org, org_full, scope, funding_type, seeds, variants
                     "geographical_scope": scope,
                     "funding_type": funding_type,
                     "research_topics": topics,
-                    "eligible_applicants": applicants,
-                    "status": status,
                 },
                 status=status,
                 eligible_applicants=applicants,
