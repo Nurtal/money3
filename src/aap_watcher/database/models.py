@@ -63,6 +63,7 @@ class AAPRecord(Base):
     scraped_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )
+    selected_projects: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 
 class RawDocument(Base):

@@ -21,6 +21,7 @@ from .models import AAPRecord, Base, Notification, RawDocument
 _COMPARED = (
     "title", "organisation", "description", "amount_max", "currency",
     "deadline", "eligibility", "status", "funding_type", "geographical_scope",
+    "selected_projects",
 )
 
 _CANCEL_KW = (
@@ -179,6 +180,7 @@ class Repository:
             extraction_method=extraction.extraction_method,
             confidence_score=extraction.confidence_score,
             source_text=extraction.provenance.source_text if extraction.provenance else None,
+            selected_projects=", ".join(extraction.selected_projects),
         )
         with self._sf() as session:
             session.add(record)

@@ -73,6 +73,7 @@ class AAPExtraction(BaseModel):
     extraction_method: str = "unknown"
     confidence_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     provenance: Optional[Provenance] = None
+    selected_projects: list[str] = Field(default_factory=list)
 
     def dedupe_key(self) -> str:
         """Stable key used for basic deduplication (README: basic dedup)."""
