@@ -176,6 +176,84 @@ def test_title_prefers_official_call_code():
     assert ex.title == "HEALTH-2028"
 
 
+# ---------------------------------------------------------------------------
+# amount_min: range parsing
+# ---------------------------------------------------------------------------
+
+AMOUNT_RANGE_DE_A = """
+Appel à projets : Matériaux 2029
+
+Budget : De 50 000 € à 400 000 €.
+"""
+
+
+def test_amount_min_from_de_a_range():
+    ex = RegexExtractor().extract(Document(text=AMOUNT_RANGE_DE_A))
+    assert ex.amount_min == 50000
+    assert ex.amount_max == 400000
+
+
+AMOUNT_RANGE_ENTRE = """
+Appel à projets : Énergie 2029
+
+Financement : Entre 100 000 et 500 000 EUR.
+"""
+
+
+def test_amount_min_from_entre_et_range():
+    ex = RegexExtractor().extract(Document(text=AMOUNT_RANGE_ENTRE))
+    assert ex.amount_min == 100000
+    assert ex.amount_max == 500000
+
+
+AMOUNT_RANGE_MONTANT = """
+Appel à projets : Climat 2029
+
+Montant : 3 000 000 à 5 000 000 €.
+"""
+
+
+def test_amount_min_from_montant_a_range():
+    ex = RegexExtractor().extract(Document(text=AMOUNT_RANGE_MONTANT))
+    assert ex.amount_min == 3000000
+    assert ex.amount_max == 5000000
+
+
+AMOUNT_NO_MIN = """
+Appel à projets : Santé 2029
+
+Montant maximal : 200 000 €.
+"""
+
+
+def test_amount_min_none_when_no_range():
+    ex = RegexExtractor().extract(Document(text=AMOUNT_NO_MIN))
+    assert ex.amount_min is None
+
+
+# ---------------------------------------------------------------------------
+# status detection integration
+# ---------------------------------------------------------------------------
+
+
+def test_regex_detects_status_open():
+    ex = RegexExtractor().extract(Document(text="Appel ouvert. Montant : 100 000 €."))
+    assert ex.status == "open"
+
+
+def test_regex_detects_status_closed():
+    ex = RegexExtractor().extract(Document(text="Ce appel est clôturé."))
+    assert ex.status == "closed"
+
+
+def test_regex_detects_status_cancelled():
+    ex = RegexExtractor().extract(Document(text="Appel annulé par l'organisme."))
+    assert ex.status == "cancelled"
+
+
+def test_regex_status_unknown_when_no_marker():
+    ex = RegexExtractor().extract(Document(text="L'appel finance la recherche en physique."))
+    assert ex.status == "unknown"
 
 
 

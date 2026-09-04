@@ -17,7 +17,8 @@ import re
 from datetime import datetime
 from typing import Optional
 
-from ..schema import AAPExtraction, AAPStatus, Provenance
+from ..schema import AAPExtraction, Provenance
+from ._status import detect_status
 from .base import Document, Extractor
 
 # ---------------------------------------------------------------------------
@@ -257,6 +258,81 @@ def _parse_amount(raw: str) -> Optional[int]:
         return None
 
 
+# ---------------------------------------------------------------------------
+# Amount-min: range patterns
+# ---------------------------------------------------------------------------
+
+_AMOUNT_MIN_PATTERNS: list[re.Pattern[str]] = [
+    # "de X à Y €" / "De X à Y EUR"
+    re.compile(
+        r"(?:de|budget\s+de)\s+(\d[\d\s.,]*)\s*(?:€|EUR)?\s*à\s+(\d[\d\s.,]*)",
+        re.IGNORECASE,
+    ),
+    # "entre X et Y €"
+    re.compile(
+        r"entre\s+(\d[\d\s.,]*)\s+et\s+(\d[\d\s.,]*)",
+        re.IGNORECASE,
+    ),
+    # "Montant : X à Y €"
+    re.compile(
+        r"(?:montant|financement|budget)\s*[:\s]+"
+        r"(\d[\d\s.,]*)\s*(?:€|EUR)?\s*à\s+(\d[\d\s.,]*)",
+        re.IGNORECASE,
+    ),
+    # "minimum X €" or "min X €" or "à partir de X €"
+    re.compile(
+        r"(?:min(?:imum)?|à\s+partir\s+de)\s*[:\s]*(\d[\d\s.,]*)\s*(?:€|EUR)?",
+        re.IGNORECASE,
+    ),
+]
+
+
+def _clean_amount(raw: str) -> int | None:
+    """Strip spaces/thousands separators and convert to int."""
+    digits = raw.replace(" ", "").replace(".", "").replace(",", "")
+    try:
+        return int(digits)
+    except ValueError:
+        return None
+
+
+def _extract_amount_min(text: str) -> int | None:
+    """Return the minimum amount from a range pattern in *text*, or None."""
+    for pat in _AMOUNT_MIN_PATTERNS:
+        m = pat.search(text)
+        if m:
+            groups = m.groups()
+            val = _clean_amount(groups[0])
+            if val is not None and val > 0:
+                return val
+    return None
+
+
+# Patterns that indicate a range (used to skip the lower bound in _best_amount).
+_RANGE_KW_RE = re.compile(
+    r"(?i)(?:de|entre|montant|financement|budget)\s"
+    r".*?\d[\d\s.,]*\s*(?:€|EUR)?\s*à\s+\d[\d\s.,]*",
+)
+
+
+def _range_spans(text: str) -> list[tuple[int, int, int]]:
+    """Return list of (start, mid, end) for range patterns.
+
+    ``mid`` is the approximate position of the separator (à/et) — amounts
+    before ``mid`` are the lower bound (amount_min); amounts at or after
+    ``mid`` are the upper bound (amount_max).
+    """
+    out: list[tuple[int, int, int]] = []
+    for m in _RANGE_KW_RE.finditer(text):
+        full = m.group(0)
+        sep = full.rfind("à")
+        if sep == -1:
+            sep = full.rfind("et")
+        mid = m.start() + sep if sep != -1 else m.start() + len(full) // 2
+        out.append((m.start(), mid, m.end()))
+    return out
+
+
 def _parse_french_date(day_str: str, month_str: str, year_str: str) -> str:
     """Parse a French date to ISO YYYY-MM-DD."""
     # Strip ordinal suffix ("1er" → "1")
@@ -324,13 +400,21 @@ def _best_amount(text: str) -> tuple[Optional[int], Optional[str], int]:
 
     Strategy:
       * recurring annual grants ("22 000 € par an pendant 3 ans") sum to
-        annual \u00d7 duration;
+        annual × duration;
+      * amounts inside range patterns ("de X à Y €", "entre X et Y €") are
+        skipped — the lower bound is handled by _extract_amount_min;
       * otherwise prefer an amount written right after a clear "Montant
         maximal" label (colon-introduced first), taking the *nearest* amount to
         the label so distracters elsewhere in the doc cannot win;
       * finally fall back to the first amount of any supported surface format.
     Returns (amount, currency, span_start).
     """
+    spans = _range_spans(text)
+
+    def _in_range(pos: int) -> bool:
+        """Return True if *pos* is the lower bound of a range pattern."""
+        return any(s <= pos < mid for s, mid, _e in spans)
+
     def _parse_match(m: re.Match) -> Optional[int]:
         full = m.group(0)
         if "M€" in full:
@@ -347,9 +431,12 @@ def _best_amount(text: str) -> tuple[Optional[int], Optional[str], int]:
         for pat in (_AMOUNT_STANDARD_RE, _AMOUNT_EUR_PREFIX_RE,
                     _AMOUNT_COMPACT_RE, _AMOUNT_MILLIONS_RE):
             for m in pat.finditer(rest):
+                abs_pos = pos + m.start()
+                if _in_range(abs_pos):
+                    continue
                 val = _parse_match(m)
                 if val is not None:
-                    found.append((pos + m.start(), val))
+                    found.append((abs_pos, val))
         found.sort()
         return found
 
@@ -382,11 +469,12 @@ def _best_amount(text: str) -> tuple[Optional[int], Optional[str], int]:
         if val is not None:
             return val, "EUR", lm.end()
 
-    # Priority 2: first match of any format anywhere.
+    # Priority 2: first match of any format anywhere (skip range spans).
     for pat in (_AMOUNT_STANDARD_RE, _AMOUNT_EUR_PREFIX_RE,
                 _AMOUNT_COMPACT_RE, _AMOUNT_MILLIONS_RE):
-        m = pat.search(text)
-        if m:
+        for m in pat.finditer(text):
+            if _in_range(m.start()):
+                continue
             val = _parse_match(m)
             if val is not None:
                 return val, "EUR", m.start()
@@ -414,6 +502,9 @@ class RegexExtractor:
 
         # --- Amount ---
         amount_max, currency, _ = _best_amount(text)
+
+        # --- Amount min ---
+        min_val = _extract_amount_min(text)
 
         # --- Deadline ---
         deadline = _best_date(text, _DEADLINE_KW_RE)
@@ -450,6 +541,7 @@ class RegexExtractor:
             title=title,
             organisation=organisation,
             geographical_scope=geographical_scope,
+            amount_min=min_val,
             amount_max=amount_max,
             currency=currency,
             deadline=deadline,
@@ -457,6 +549,6 @@ class RegexExtractor:
             eligibility=eligibility,
             source_url=document.source_url,
             extraction_method=self.name,
-            status=AAPStatus.UNKNOWN,
+            status=detect_status(text),
             provenance=prov,
         )
