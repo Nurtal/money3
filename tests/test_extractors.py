@@ -74,3 +74,36 @@ def test_registry_skips_unavailable_deps():
     assert len(extractors) >= 4
     for e in extractors:
         assert hasattr(e, "extract")
+
+
+def test_dictionary_detects_status_open():
+    ex = DictionaryExtractor().extract(Document(text="Appel ouvert. Candidatures ouvertes."))
+    assert ex.status == "open"
+
+
+def test_dictionary_detects_status_closed():
+    ex = DictionaryExtractor().extract(Document(text="Ce appel est clôturé."))
+    assert ex.status == "closed"
+
+
+def test_dictionary_status_unknown_when_no_marker():
+    ex = DictionaryExtractor().extract(Document(text="Financement recherche."))
+    assert ex.status == "unknown"
+
+
+def test_dictionary_expanded_topics():
+    text = "Thématiques : biologie cellulaire, agronomie, cybersécurité."
+    ex = DictionaryExtractor().extract(Document(text=text))
+    topics = [t.lower() for t in ex.research_topics]
+    assert "biologie cellulaire" in topics
+    assert "agronomie" in topics
+    assert "cybersécurité" in topics
+
+
+def test_dictionary_expanded_applicants():
+    text = "Candidats : CEA, MNHN, postdocs, organismes publics."
+    ex = DictionaryExtractor().extract(Document(text=text))
+    applicants = [a.lower() for a in ex.eligible_applicants]
+    assert "cea" in applicants
+    assert "mnhn" in applicants
+    assert "postdocs" in applicants

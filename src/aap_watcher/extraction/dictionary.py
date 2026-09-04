@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Optional
 
 from ..schema import AAPExtraction, AAPStatus, Provenance
+from ._status import detect_status
 from .base import Document, Extractor
 
 # (canonical gold value, [text patterns to look for])
@@ -59,6 +60,9 @@ APPLICANTS = [
     "instituts de recherche", "organisations de recherche", "jeunes chercheurs",
     "centres de lutte contre le cancer", "étudiants en thèse", "docteurs",
     "écoles d'ingénieurs", "centres hospitaliers", "centres anticancéreux",
+    "cea", "mnhn", "ird", "postdocs", "organismes publics",
+    "établissements de santé", "cliniques", "ehpad",
+    "associations de patients", "entreprises innovantes",
 ]
 
 # geographical scope implied by the issuing organisation. Domain prior: an ARS
@@ -94,6 +98,16 @@ TOPICS = [
     "neuroimagerie", "interfaces cerveau-machine", "énergie solaire",
     "hydrogène vert", "stockage d'énergie", "réseaux électriques intelligents",
     "santé numérique", "santé publique", "recherche clinique",
+    "biologie cellulaire", "physique", "chimie", "mathématiques",
+    "algorithmique", "cybersécurité", "agronomie",
+    "transition écologique", "énergie", "biodiversité",
+    "sciences de la vie", "deep tech", "biotechnologies",
+    "recherche translationnelle", "épidémiologie", "microbiologie",
+    "infectiologie", "virologie", "pharmacovigilance",
+    "maladie d'alzheimer", "neurodégénérescence", "neurobiologie",
+    "accompagnement", "sécurité sanitaire", "sciences de la matière",
+    "calcul haute performance", "éco-conception", "ressources naturelles",
+    "muscle", "médecine régénérative", "épigénétique",
 ]
 
 
@@ -151,6 +165,6 @@ class DictionaryExtractor:
             geographical_scope=geographical_scope,
             source_url=document.source_url,
             extraction_method=self.name,
-            status=AAPStatus.UNKNOWN,
+            status=detect_status(text),
             provenance=prov,
         )
